@@ -12,12 +12,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { catchError, finalize, takeUntil, tap } from 'rxjs/operators';
-import { ApiStatus, Employee, EmployeeResponse, FileData } from '../../models/employee.model';
-import { EmployeeService } from '../../services/employee.service';
+import { ApiStatus, Candidate, CandidateResponse, FileData } from '../../models/candidate.model';
+import { CandidateService } from '../../services/candidate.service';
 import { FileService } from '../../services/file.service';
 
 @Component({
-  selector: 'app-employee-form',
+  selector: 'app-candidate-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -32,23 +32,23 @@ import { FileService } from '../../services/file.service';
     MatProgressSpinnerModule,
     MatExpansionModule
   ],
-  templateUrl: './employee-form.component.html',
-  styleUrls: ['./employee-form.component.scss']
+  templateUrl: './candidate-form.component.html',
+  styleUrls: ['./candidate-form.component.scss']
 })
-export class EmployeeFormComponent implements OnInit, OnDestroy {
-  employeeForm: FormGroup;
+export class CandidateFormComponent implements OnInit, OnDestroy {
+  candidateForm: FormGroup;
   selectedFile: File | null = null;
   fileData: FileData | null = null;
   isLoading = false;
   isLoadingCandidates = false;
   fileError: string | null = null;
 
-  private employeeDataSubject = new BehaviorSubject<EmployeeResponse[]>([]);
-  public employeeData$ = this.employeeDataSubject.asObservable();
+  private candidateDataSubject = new BehaviorSubject<CandidateResponse[]>([]);
+  public candidateData$ = this.candidateDataSubject.asObservable();
 
   public apiStatus: ApiStatus = { online: true, lastCheck: new Date(), usingCachedData: false };
 
-  public employeeDataSource = new MatTableDataSource<EmployeeResponse>([]);
+  public candidateDataSource = new MatTableDataSource<CandidateResponse>([]);
 
   displayedColumns: string[] = ['name', 'surname', 'seniority', 'yearsOfExperience', 'availability'];
 
@@ -56,33 +56,33 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private employeeService: EmployeeService,
+    private candidateService: CandidateService,
     private fileService: FileService,
     private snackBar: MatSnackBar
   ) {
-    this.employeeForm = this.fb.group({
+    this.candidateForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       surname: ['', [Validators.required, Validators.minLength(2)]]
     });
   }
 
   ngOnInit(): void {
-    this.employeeService.apiStatus$.pipe(
+    this.candidateService.apiStatus$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(status => {
       this.apiStatus = status;
       if (status.online && !status.usingCachedData) {
-        const hasData = this.employeeDataSubject.value.length > 0;
+        const hasData = this.candidateDataSubject.value.length > 0;
         if (hasData) {
           this.showSuccess('✅ Servidor reconectado - Datos actualizados');
         }
       }
     });
 
-    this.employeeData$.pipe(
+    this.candidateData$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(data => {
-      this.employeeDataSource.data = data;
+      this.candidateDataSource.data = data;
     });
 
     this.loadCandidates();
@@ -94,11 +94,11 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   }
 
   loadCandidates(): void {
-    const cachedInfo = this.employeeService.getCachedDataInfo();
+    const cachedInfo = this.candidateService.getCachedDataInfo();
     const hasCachedData = cachedInfo.candidates.length > 0;
 
     if (hasCachedData) {
-      this.employeeDataSubject.next(cachedInfo.candidates);
+      this.candidateDataSubject.next(cachedInfo.candidates);
       const lastUpdate = cachedInfo.lastUpdated
         ? new Date(cachedInfo.lastUpdated).toLocaleString()
         : 'desconocida';
@@ -107,9 +107,9 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       this.isLoadingCandidates = true;
     }
 
-    this.employeeService.getAllCandidates().pipe(
+    this.candidateService.getAllCandidates().pipe(
       tap(freshCandidates => {
-        this.employeeDataSubject.next(freshCandidates);
+        this.candidateDataSubject.next(freshCandidates);
       }),
       catchError(error => {
         console.error('Servidor no disponible:', error);
@@ -144,6 +144,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     } else if (fileExtension === 'csv') {
       parseObservable = this.fileService.parseCSVFile(file);
     } else {
+      this.selectedFile = null;
       this.fileError = 'Formato de archivo no soportado. Use .xlsx, .xls o .csv';
       this.showError('Formato de archivo no soportado. Use .xlsx, .xls o .csv');
       return;
@@ -165,15 +166,15 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.employeeForm.valid && this.selectedFile) {
+    if (this.candidateForm.valid && this.selectedFile) {
       this.isLoading = true;
 
-      const employeeData: Employee = {
-        name: this.employeeForm.value.name,
-        surname: this.employeeForm.value.surname
+      const candidateData: Candidate = {
+        name: this.candidateForm.value.name,
+        surname: this.candidateForm.value.surname
       };
 
-      this.employeeService.submitEmployee(employeeData, this.selectedFile).pipe(
+      this.candidateService.submitCandidate(candidateData, this.selectedFile).pipe(
         tap(response => {
           this.showSuccess('Candidato registrado correctamente');
           this.resetForm();
@@ -194,11 +195,11 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
 
   refreshData(): void {
     this.loadCandidates();
-    this.employeeService.forceApiCheck();
+    this.candidateService.forceApiCheck();
   }
 
   private resetForm(): void {
-    this.employeeForm.reset();
+    this.candidateForm.reset();
     this.selectedFile = null;
     this.fileData = null;
     this.fileError = null;
@@ -230,11 +231,11 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  get name() { return this.employeeForm.get('name'); }
-  get surname() { return this.employeeForm.get('surname'); }
+  get name() { return this.candidateForm.get('name'); }
+  get surname() { return this.candidateForm.get('surname'); }
 
   get canSubmit(): boolean {
-    return this.employeeForm.valid && this.selectedFile !== null && !this.isLoading;
+    return this.candidateForm.valid && this.selectedFile !== null && !this.isLoading;
   }
 
   get statusCardClass(): string {

@@ -8,5 +8,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Employee Management System';
+  title = 'Sistema de Gestión de Candidatos';
 }

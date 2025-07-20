@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { EmployeeFormComponent } from './components/employee-form/employee-form.component';
+import { CandidateFormComponent } from './components/candidate-form/candidate-form.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/employees', pathMatch: 'full' },
-  { path: 'employees', component: EmployeeFormComponent },
-  { path: '**', redirectTo: '/employees' }
+  { path: '', redirectTo: '/candidates', pathMatch: 'full' },
+  { path: 'candidates', component: CandidateFormComponent },
+  { path: '**', redirectTo: '/candidates' }
 ];

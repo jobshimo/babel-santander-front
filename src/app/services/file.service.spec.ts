@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FileData } from '../models/employee.model';
+import { FileData } from '../models/candidate.model';
 import { FileService } from './file.service';
 
 describe('FileService', () => {
@@ -17,10 +17,9 @@ describe('FileService', () => {
   });
 
   describe('parseCSVFile', () => {
-    it('should parse valid CSV file', (done) => {
+    it('should parse valid CSV file with junior seniority', (done) => {
       const csvContent = 'seniority,yearsOfExperience,availability\njunior,3,true';
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], 'test.csv', { type: 'text/csv' });
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
 
       service.parseCSVFile(file).subscribe({
         next: (result: FileData) => {
@@ -30,15 +29,14 @@ describe('FileService', () => {
           done();
         },
         error: (error) => {
-          fail('Should not have errored: ' + error.message);
+          fail(error.message);
         }
       });
     });
 
-    it('should handle senior seniority', (done) => {
+    it('should parse valid CSV file with senior seniority', (done) => {
       const csvContent = 'seniority,yearsOfExperience,availability\nsenior,8,false';
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], 'test.csv', { type: 'text/csv' });
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
 
       service.parseCSVFile(file).subscribe({
         next: (result: FileData) => {
@@ -48,19 +46,18 @@ describe('FileService', () => {
           done();
         },
         error: (error) => {
-          fail('Should not have errored: ' + error.message);
+          fail(error);
         }
       });
     });
 
-    it('should reject invalid seniority', (done) => {
+    it('should reject CSV with invalid seniority value', (done) => {
       const csvContent = 'seniority,yearsOfExperience,availability\nmiddle,3,true';
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], 'test.csv', { type: 'text/csv' });
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
 
       service.parseCSVFile(file).subscribe({
         next: () => {
-          fail('Should have errored');
+          fail('Should have thrown an error for invalid seniority');
         },
         error: (error) => {
           expect(error.message).toContain('seniority debe ser "junior" o "senior"');
@@ -69,14 +66,13 @@ describe('FileService', () => {
       });
     });
 
-    it('should reject invalid yearsOfExperience', (done) => {
+    it('should reject CSV with invalid years of experience', (done) => {
       const csvContent = 'seniority,yearsOfExperience,availability\njunior,invalid,true';
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], 'test.csv', { type: 'text/csv' });
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
 
       service.parseCSVFile(file).subscribe({
         next: () => {
-          fail('Should have errored');
+          fail('Should have thrown an error for invalid yearsOfExperience');
         },
         error: (error) => {
           expect(error.message).toContain('yearsOfExperience debe ser un número positivo');
@@ -85,14 +81,13 @@ describe('FileService', () => {
       });
     });
 
-    it('should reject invalid availability', (done) => {
+    it('should reject CSV with invalid availability value', (done) => {
       const csvContent = 'seniority,yearsOfExperience,availability\njunior,3,maybe';
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], 'test.csv', { type: 'text/csv' });
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
 
       service.parseCSVFile(file).subscribe({
         next: () => {
-          fail('Should have errored');
+          fail('Should have thrown an error for invalid availability');
         },
         error: (error) => {
           expect(error.message).toContain('availability debe ser "true" o "false"');
@@ -101,14 +96,13 @@ describe('FileService', () => {
       });
     });
 
-    it('should reject missing columns', (done) => {
+    it('should reject CSV with missing required columns', (done) => {
       const csvContent = 'seniority,yearsOfExperience\njunior,3';
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], 'test.csv', { type: 'text/csv' });
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
 
       service.parseCSVFile(file).subscribe({
         next: () => {
-          fail('Should have errored');
+          fail('Should have thrown an error for missing columns');
         },
         error: (error) => {
           expect(error.message).toContain('debe contener las columnas: seniority, yearsOfExperience, availability');
@@ -117,17 +111,46 @@ describe('FileService', () => {
       });
     });
 
-    it('should reject multiple data rows', (done) => {
+    it('should reject CSV with multiple data rows', (done) => {
       const csvContent = 'seniority,yearsOfExperience,availability\njunior,3,true\nsenior,5,false';
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], 'test.csv', { type: 'text/csv' });
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
 
       service.parseCSVFile(file).subscribe({
         next: () => {
-          fail('Should have errored');
+          fail('Should have thrown an error for multiple data rows');
         },
         error: (error) => {
           expect(error.message).toContain('debe contener exactamente una fila de datos');
+          done();
+        }
+      });
+    });
+
+    it('should reject CSV with no data rows', (done) => {
+      const csvContent = 'seniority,yearsOfExperience,availability';
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+
+      service.parseCSVFile(file).subscribe({
+        next: () => {
+          fail('Should have thrown an error for no data rows');
+        },
+        error: (error) => {
+          expect(error.message).toContain('debe contener exactamente una fila de datos');
+          done();
+        }
+      });
+    });
+
+    it('should reject CSV with negative years of experience', (done) => {
+      const csvContent = 'seniority,yearsOfExperience,availability\njunior,-1,true';
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+
+      service.parseCSVFile(file).subscribe({
+        next: () => {
+          fail('Should have thrown an error for negative yearsOfExperience');
+        },
+        error: (error) => {
+          expect(error.message).toContain('yearsOfExperience debe ser un número positivo');
           done();
         }
       });

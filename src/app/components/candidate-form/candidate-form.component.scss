@@ -1,4 +1,4 @@
-.employee-form-container {
+.candidate-form-container {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
@@ -75,7 +75,7 @@
   }
 }
 
-.employee-form {
+.candidate-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -180,7 +180,7 @@
         font-style: italic;
       }
 
-      // Hover effect
+
       &:hover {
         background-color: #bbdefb !important;
       }
@@ -328,7 +328,7 @@
 }
 
 @media (max-width: 768px) {
-  .employee-form-container {
+  .candidate-form-container {
     padding: 16px;
   }
 
@@ -358,7 +358,7 @@
   }
 }
 
-// Estilos globales para mejor visibilidad del expansion panel
+
 ::ng-deep .file-instructions {
   .mat-expansion-panel-header {
     .mat-expansion-indicator::after {
@@ -366,7 +366,7 @@
       border-color: #0d47a1 !important;
     }
 
-    // Cambiar el color específico del indicador y su SVG
+
     .mat-expansion-indicator {
       color: #0d47a1 !important;
 
@@ -375,7 +375,7 @@
       }
     }
 
-    // Estilo para cuando está expandido
+
     &[aria-expanded='true'] .mat-expansion-indicator::after {
       transform: rotate(180deg) !important;
       color: #0d47a1 !important;
@@ -383,7 +383,7 @@
   }
 }
 
-// Estilo más específico para Angular Material y el SVG
+
 ::ng-deep mat-expansion-panel-header .mat-expansion-indicator {
   svg {
     fill: #0d47a1 !important;

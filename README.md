@@ -1,93 +1,86 @@
-# Employee Management System
+# Sistema de Gestión de Candidatos
 
-Angular application for employee management with file upload functionality.
+Aplicación Angular para gestión de candidatos con funcionalidad de carga de archivos.
 
-## Quick Start
+## Inicio Rápido
 
-### Prerequisites
-- Node.js (16+ recommended)
-- npm or yarn
+### Prerrequisitos
+- Node.js (16+ recomendado)
+- npm o yarn
 
-### Installation & Run
+### Instalación y Ejecución
 
 ```bash
-# Clone and navigate to project
+# Clonar y navegar al proyecto
 cd frontend
 
-# Install dependencies
+# Instalar dependencias
 npm install
 
-# Start development server
+# Iniciar servidor de desarrollo
 npm start
-# or
+# o
 ng serve
 
-# Open browser at http://localhost:4200
+# Abrir navegador en http://localhost:4200
 ```
 
 ## Features
 
-- Employee registration form with validation
-- Excel/CSV file upload with data validation
-- Real-time data display in Material Design table
-- Reactive programming with RxJS
-- Local storage caching
-- Standalone Angular components
+- Formulario de registro de candidatos con validación
+- Carga de archivos Excel/CSV con validación de datos
+- Visualización de datos en tiempo real con tabla de Material Design
+- Programación reactiva con RxJS
+- Caché de almacenamiento local
+- Componentes standalone de Angular
 
 ## Usage
 
-1. **Fill the form**: Enter name and surname (required, min 2 characters each)
-2. **Upload file**: Select Excel (.xlsx/.xls) or CSV file with employee data
-3. **Submit**: Click "Registrar Empleado" to save the employee
+1. **Llenar formulario**: Ingresar nombre y apellido (requeridos, mín 2 caracteres cada uno)
+2. **Subir archivo**: Seleccionar archivo Excel (.xlsx/.xls) o CSV con datos del candidato
+3. **Enviar**: Hacer clic en "Registrar Candidato" para guardar el candidato
 
-### File Format Requirements
+### Requisitos del formato de archivo
 
-Your file must contain exactly **one data row** with these columns:
-- `seniority`: "junior" or "senior"
-- `yearsOfExperience`: positive integer
-- `availability`: true or false
+Tu archivo debe contener exactamente **una fila de datos** con estas columnas:
+- `seniority`: "junior" o "senior"
+- `yearsOfExperience`: número entero positivo
+- `availability`: true o false
 
-#### Example CSV:
+#### Ejemplo CSV:
 ```csv
 seniority,yearsOfExperience,availability
 junior,3,true
 ```
 
-## Available Scripts
+## Scripts Disponibles
 
 ```bash
-npm start          # Start dev server
-npm run build      # Build for production
-npm test           # Run tests
-npm run lint       # Run linter
+npm start          # Iniciar servidor de desarrollo
+npm run build      # Compilar para producción
+npm test           # Ejecutar tests
+npm run lint       # Ejecutar linter
 ```
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 src/
 ├── app/
-│   ├── components/employee-form/     # Main form component
-│   ├── models/employee.model.ts      # TypeScript interfaces
-│   ├── services/                     # HTTP and file services
-│   └── app.config.ts                # App configuration
+│   ├── components/candidate-form/     # Componente principal del formulario
+│   ├── models/candidate.model.ts      # Interfaces de TypeScript
+│   ├── services/                     # Servicios HTTP y de archivos
+│   └── app.config.ts                # Configuración de la aplicación
 ```
 
-## Technologies
+## Tecnologías
 
-- Angular 17+ (Standalone Components)
+- Angular 17+ (Componentes Standalone)
 - Angular Material
 - RxJS
 - TypeScript
 - SCSS
 
-## Example Files
-
-Check the root directory for example files:
-- `example-data.csv` - Valid example
-- `example-data.xlsx` - Excel format example
-- `example-data-invalid.csv` - For testing validation
-
 ---
 
-**Ready to code!** 🚀
+**¡Listo para programar!** 🚀

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import * as XLSX from 'xlsx';
-import { FileData } from '../models/employee.model';
+import { FileData } from '../models/candidate.model';
 
 @Injectable({
   providedIn: 'root'
@@ -79,7 +79,7 @@ export class FileService {
           const csvData = e.target?.result as string;
           const lines = csvData.split('\n').filter(line => line.trim() !== '');
 
-          if (lines.length !== 2) { // Header + 1 data row
+          if (lines.length !== 2) {
             observer.error(new Error('El archivo CSV debe contener exactamente una fila de datos (además del encabezado)'));
             return;
           }

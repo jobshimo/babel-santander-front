@@ -1,4 +1,4 @@
-<div class="employee-form-container">
+<div class="candidate-form-container">
   <mat-card [class]="'status-card ' + statusCardClass" class="mb-3">
     <mat-card-content>
       <div class="status-content">
@@ -16,7 +16,7 @@
     </mat-card-header>
 
     <mat-card-content>
-      <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+      <form [formGroup]="candidateForm" (ngSubmit)="onSubmit()" class="candidate-form">
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Nombre</mat-label>
@@ -118,8 +118,8 @@ junior,3,true</pre>
 
           <div *ngIf="!canSubmit && !isLoading" class="button-status">
             <mat-icon>info</mat-icon>
-            <span *ngIf="!employeeForm.valid">Complete todos los campos obligatorios</span>
-            <span *ngIf="employeeForm.valid && !selectedFile">Seleccione un archivo válido</span>
+            <span *ngIf="!candidateForm.valid">Complete todos los campos obligatorios</span>
+            <span *ngIf="candidateForm.valid && !selectedFile">Seleccione un archivo válido</span>
           </div>
         </div>
       </form>
@@ -144,7 +144,7 @@ junior,3,true</pre>
       </div>
 
       <div class="table-container" *ngIf="!isLoadingCandidates">
-        <table mat-table [dataSource]="employeeDataSource" class="mat-elevation-z8">
+        <table mat-table [dataSource]="candidateDataSource" class="mat-elevation-z8">
 
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Nombre</th>
@@ -188,7 +188,7 @@ junior,3,true</pre>
         </table>
 
 
-        <div *ngIf="employeeDataSource.data.length === 0" class="no-data">
+        <div *ngIf="candidateDataSource.data.length === 0" class="no-data">
           <mat-icon>assignment</mat-icon>
           <p>No hay candidatos registrados</p>
         </div>

@@ -2,12 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { ApiStatus, Employee, EmployeeResponse } from '../models/employee.model';
+import { ApiStatus, Candidate, CandidateResponse } from '../models/candidate.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class EmployeeService {
+export class CandidateService {
   private apiUrl = 'http://localhost:3000/candidates';
   private readonly STORAGE_KEY = 'candidatesData';
   private readonly STATUS_KEY = 'apiStatus';
@@ -63,8 +63,8 @@ export class EmployeeService {
     localStorage.setItem(this.STATUS_KEY, JSON.stringify(status));
   }
 
-  getAllCandidates(): Observable<EmployeeResponse[]> {
-    return this.http.get<EmployeeResponse[]>(this.apiUrl).pipe(
+  getAllCandidates(): Observable<CandidateResponse[]> {
+    return this.http.get<CandidateResponse[]>(this.apiUrl).pipe(
       tap(candidates => {
         this.saveCandidatesToStorage(candidates);
         const currentStatus = this.apiStatusSubject.value;
@@ -83,8 +83,8 @@ export class EmployeeService {
     );
   }
 
-  getAllCandidatesWithFallback(): Observable<EmployeeResponse[]> {
-    return this.http.get<EmployeeResponse[]>(this.apiUrl).pipe(
+  getAllCandidatesWithFallback(): Observable<CandidateResponse[]> {
+    return this.http.get<CandidateResponse[]>(this.apiUrl).pipe(
       tap(candidates => {
         this.saveCandidatesToStorage(candidates);
         const currentStatus = this.apiStatusSubject.value;
@@ -104,15 +104,15 @@ export class EmployeeService {
     );
   }
 
-  submitEmployee(employee: Employee, file: File): Observable<EmployeeResponse> {
+  submitCandidate(candidate: Candidate, file: File): Observable<CandidateResponse> {
     const formData = new FormData();
-    formData.append('name', employee.name);
-    formData.append('surname', employee.surname);
+    formData.append('name', candidate.name);
+    formData.append('surname', candidate.surname);
     if (file) {
       formData.append('file', file);
     }
 
-    return this.http.post<EmployeeResponse>(this.apiUrl, formData).pipe(
+    return this.http.post<CandidateResponse>(this.apiUrl, formData).pipe(
       tap(() => {
         const currentStatus = this.apiStatusSubject.value;
         if (!currentStatus.online || currentStatus.usingCachedData) {
@@ -124,7 +124,7 @@ export class EmployeeService {
         timestamp: new Date()
       })),
       catchError(error => {
-        console.error('Error submitting employee:', error);
+        console.error('Error submitting candidate:', error);
         const currentStatus = this.apiStatusSubject.value;
         if (currentStatus.online || !currentStatus.usingCachedData) {
           this.updateApiStatus(false, true);
@@ -134,7 +134,7 @@ export class EmployeeService {
     );
   }
 
-  private saveCandidatesToStorage(candidates: EmployeeResponse[]): void {
+  private saveCandidatesToStorage(candidates: CandidateResponse[]): void {
     const dataWithTimestamp = {
       candidates,
       lastUpdated: new Date().toISOString()
@@ -142,7 +142,7 @@ export class EmployeeService {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataWithTimestamp));
   }
 
-  private getCachedCandidates(): EmployeeResponse[] {
+  private getCachedCandidates(): CandidateResponse[] {
     try {
       const cachedData = localStorage.getItem(this.STORAGE_KEY);
       if (cachedData) {
@@ -155,7 +155,7 @@ export class EmployeeService {
     return [];
   }
 
-  getCachedDataInfo(): { candidates: EmployeeResponse[], lastUpdated: Date | null } {
+  getCachedDataInfo(): { candidates: CandidateResponse[], lastUpdated: Date | null } {
     try {
       const cachedData = localStorage.getItem(this.STORAGE_KEY);
       if (cachedData) {

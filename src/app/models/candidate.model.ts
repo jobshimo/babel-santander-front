@@ -1,4 +1,4 @@
-export interface Employee {
+export interface Candidate {
   name: string;
   surname: string;
   seniority?: 'junior' | 'senior';
@@ -6,7 +6,7 @@ export interface Employee {
   availability?: boolean;
 }
 
-export interface EmployeeResponse {
+export interface CandidateResponse {
   id?: string;
   name: string;
   surname: string;
