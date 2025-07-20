@@ -1,0 +1,198 @@
+<div class="employee-form-container">
+  <mat-card [class]="'status-card ' + statusCardClass" class="mb-3">
+    <mat-card-content>
+      <div class="status-content">
+        <span>{{ statusMessage }}</span>
+        <button mat-icon-button (click)="refreshData()" [disabled]="isLoadingCandidates">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>Registro de Candidato</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="name" placeholder="Ingrese el nombre">
+            <mat-error *ngIf="name?.hasError('required')">
+              El nombre es requerido
+            </mat-error>
+            <mat-error *ngIf="name?.hasError('minlength')">
+              El nombre debe tener al menos 2 caracteres
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="surname" placeholder="Ingrese el apellido">
+            <mat-error *ngIf="surname?.hasError('required')">
+              El apellido es requerido
+            </mat-error>
+            <mat-error *ngIf="surname?.hasError('minlength')">
+              El apellido debe tener al menos 2 caracteres
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Archivo Excel/CSV</mat-label>
+            <input matInput readonly [value]="selectedFile?.name || 'No se ha seleccionado archivo'">
+            <button mat-icon-button matSuffix (click)="fileInput.click()" type="button">
+              <mat-icon>upload_file</mat-icon>
+            </button>
+            <mat-error *ngIf="fileError">
+              {{ fileError }}
+            </mat-error>
+          </mat-form-field>
+          <input #fileInput type="file" id="fileInput" hidden accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)">
+        </div>
+
+
+        <div *ngIf="fileError" class="file-error-message">
+          <mat-icon>error</mat-icon>
+          <span>{{ fileError }}</span>
+        </div>
+
+
+        <div *ngIf="fileData && !fileError" class="file-info">
+          <mat-card class="info-card success">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>check_circle</mat-icon>
+                Archivo procesado correctamente
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p><strong>Seniority:</strong> {{ fileData.seniority }}</p>
+              <p><strong>Años de experiencia:</strong> {{ fileData.yearsOfExperience }}</p>
+              <p><strong>Disponibilidad:</strong> {{ fileData.availability ? 'Sí' : 'No' }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+
+        <div *ngIf="!selectedFile" class="file-instructions">
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>help_outline</mat-icon>
+                Ayuda con formato de archivo
+              </mat-panel-title>
+              <mat-panel-description>
+                Ver instrucciones
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="instructions-content">
+              <p>El archivo debe contener <strong>exactamente una fila de datos</strong> con estas columnas:</p>
+              <ul>
+                <li><code>seniority</code>: "junior" o "senior"</li>
+                <li><code>yearsOfExperience</code>: número entero</li>
+                <li><code>availability</code>: true o false</li>
+              </ul>
+              <p><strong>Ejemplo CSV:</strong></p>
+              <pre>seniority,yearsOfExperience,availability
+junior,3,true</pre>
+            </div>
+          </mat-expansion-panel>
+        </div>
+
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmit">
+            <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+            <span *ngIf="!isLoading">Registrar Candidato</span>
+            <span *ngIf="isLoading">Procesando...</span>
+          </button>
+
+
+          <div *ngIf="!canSubmit && !isLoading" class="button-status">
+            <mat-icon>info</mat-icon>
+            <span *ngIf="!employeeForm.valid">Complete todos los campos obligatorios</span>
+            <span *ngIf="employeeForm.valid && !selectedFile">Seleccione un archivo válido</span>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+
+  <mat-card class="table-card">
+    <mat-card-header>
+      <mat-card-title>
+        Candidatos Registrados
+        <button mat-icon-button (click)="refreshData()" [disabled]="isLoadingCandidates" class="refresh-btn">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div *ngIf="isLoadingCandidates" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Cargando candidatos...</p>
+      </div>
+
+      <div class="table-container" *ngIf="!isLoadingCandidates">
+        <table mat-table [dataSource]="employeeDataSource" class="mat-elevation-z8">
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+          </ng-container>
+
+
+          <ng-container matColumnDef="surname">
+            <th mat-header-cell *matHeaderCellDef>Apellido</th>
+            <td mat-cell *matCellDef="let element">{{ element.surname }}</td>
+          </ng-container>
+
+
+          <ng-container matColumnDef="seniority">
+            <th mat-header-cell *matHeaderCellDef>Seniority</th>
+            <td mat-cell *matCellDef="let element">
+              <span [class]="'seniority-' + element.seniority">
+                {{ element.seniority | titlecase }}
+              </span>
+            </td>
+          </ng-container>
+
+
+          <ng-container matColumnDef="yearsOfExperience">
+            <th mat-header-cell *matHeaderCellDef>Años de experiencia</th>
+            <td mat-cell *matCellDef="let element">{{ element.yearsOfExperience }}</td>
+          </ng-container>
+
+
+          <ng-container matColumnDef="availability">
+            <th mat-header-cell *matHeaderCellDef>Disponibilidad</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-icon [class]="element.availability ? 'available' : 'unavailable'">
+                {{ element.availability ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+
+        <div *ngIf="employeeDataSource.data.length === 0" class="no-data">
+          <mat-icon>assignment</mat-icon>
+          <p>No hay candidatos registrados</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
