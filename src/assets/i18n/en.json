@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Candidate Management System",
+    "language": "Language"
+  },
+  "candidateForm": {
+    "title": "Candidate Registration",
+    "name": "Name",
+    "surname": "Surname",
+    "seniority": "Seniority",
+    "yearsOfExperience": "Years of experience",
+    "availability": "Availability",
+    "file": "Excel/CSV File",
+    "selectFile": "Select file",
+    "noFileSelected": "No file selected",
+    "submit": "Register Candidate",
+    "refresh": "Refresh data",
+    "registeredCandidates": "Registered Candidates",
+    "loadingCandidates": "Loading candidates",
+    "fileProcessedCorrectly": "File processed correctly",
+    "yes": "Yes",
+    "no": "No",
+    "fileFormatHelp": "File format help",
+    "viewInstructions": "View instructions",
+    "fileInstructions": "The file must contain exactly one data row with these columns:",
+    "integerNumber": "integer number",
+    "csvExample": "CSV Example",
+    "completeAllFields": "Complete all required fields",
+    "selectValidFile": "Select a valid file",
+    "errors": {
+      "nameRequired": "Name is required",
+      "nameMinlength": "Name must be at least 2 characters long",
+      "surnameRequired": "Surname is required",
+      "surnameMinlength": "Surname must be at least 2 characters long",
+      "fileRequired": "You must select a file",
+      "fileInvalidFormat": "Invalid file format. Only .xlsx and .csv files are allowed",
+      "fileEmpty": "File is empty",
+      "fileInvalidColumns": "File must contain exactly 3 columns: seniority, yearsOfExperience, availability",
+      "fileInvalidSeniority": "Seniority field must be \"junior\" or \"senior\"",
+      "fileInvalidExperience": "Years of experience field must be a positive number",
+      "fileInvalidAvailability": "Availability field must be \"true\" or \"false\"",
+      "fileReadError": "Error reading file",
+      "fileInvalidRows": "File must contain exactly one data row (may include a header row)",
+      "fileColumnMismatch": "Number of columns doesn't match"
+    },
+    "placeholders": {
+      "enterName": "Enter name",
+      "enterSurname": "Enter surname"
+    }
+  },
+  "status": {
+    "noData": "No candidates registered",
+    "hasData": "{{count}} candidate(s) registered",
+    "loading": "Loading",
+    "error": "Error loading data"
+  },
+  "success": {
+    "candidateRegistered": "Candidate registered successfully"
+  },
+  "languages": {
+    "es": "Español",
+    "en": "English"
+  }
+}

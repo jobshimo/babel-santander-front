@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { getTranslocoTestingModule } from './testing/transloco-testing';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      imports: [
+        AppComponent,
+        getTranslocoTestingModule()
+      ],
     }).compileComponents();
   });
 
@@ -14,10 +18,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the correct title`, () => {
+  it('should have the app.title translation key', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('Sistema de Gestión de Candidatos');
+    expect(app.title).toEqual('app.title');
   });
 
   it('should render title', () => {

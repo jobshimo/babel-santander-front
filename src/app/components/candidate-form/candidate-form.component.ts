@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { catchError, finalize, takeUntil, tap } from 'rxjs/operators';
 import { ApiStatus, Candidate, CandidateResponse, FileData } from '../../models/candidate.model';
@@ -28,6 +29,7 @@ import { FileService } from '../../services/file.service';
     MatTableModule,
     MatCardModule,
     MatSnackBarModule,
+    TranslocoModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatExpansionModule
@@ -58,7 +60,8 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private candidateService: CandidateService,
     private fileService: FileService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private translocoService: TranslocoService
   ) {
     this.candidateForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -145,8 +148,8 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
       parseObservable = this.fileService.parseCSVFile(file);
     } else {
       this.selectedFile = null;
-      this.fileError = 'Formato de archivo no soportado. Use .xlsx, .xls o .csv';
-      this.showError('Formato de archivo no soportado. Use .xlsx, .xls o .csv');
+      this.fileError = 'candidateForm.errors.fileInvalidFormat';
+      this.showError(this.translocoService.translate('candidateForm.errors.fileInvalidFormat'));
       return;
     }
 
@@ -154,12 +157,13 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
       tap(data => {
         this.fileData = data;
         this.fileError = null;
-        this.showSuccess('Archivo procesado correctamente');
+        this.showSuccess(this.translocoService.translate('success.candidateRegistered'));
       }),
       catchError(error => {
-        this.fileError = error.message;
+        const translatedErrorKey = this.getTranslatedError(error.message);
+        this.fileError = translatedErrorKey;
         this.fileData = null;
-        this.showError(error.message);
+        this.showError(this.translocoService.translate(translatedErrorKey));
         return [];
       })
     ).subscribe();
@@ -176,12 +180,12 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
 
       this.candidateService.submitCandidate(candidateData, this.selectedFile).pipe(
         tap(response => {
-          this.showSuccess('Candidato registrado correctamente');
+          this.showSuccess(this.translocoService.translate('success.candidateRegistered'));
           this.resetForm();
           this.loadCandidates();
         }),
         catchError(error => {
-          this.showError('Error al registrar candidato. El servidor no está disponible.');
+          this.showError(this.translocoService.translate('status.error'));
           return [];
         }),
         finalize(() => {
@@ -189,7 +193,7 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
         })
       ).subscribe();
     } else {
-      this.showError('Por favor, complete todos los campos requeridos y seleccione un archivo');
+      this.showError(this.translocoService.translate('candidateForm.errors.fileRequired'));
     }
   }
 
@@ -231,6 +235,18 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
     });
   }
 
+  private getTranslatedError(errorMessage: string): string {
+    if (errorMessage.includes('vacío')) return 'candidateForm.errors.fileEmpty';
+    if (errorMessage.includes('columnas')) return 'candidateForm.errors.fileInvalidColumns';
+    if (errorMessage.includes('seniority')) return 'candidateForm.errors.fileInvalidSeniority';
+    if (errorMessage.includes('yearsOfExperience')) return 'candidateForm.errors.fileInvalidExperience';
+    if (errorMessage.includes('availability')) return 'candidateForm.errors.fileInvalidAvailability';
+    if (errorMessage.includes('leer')) return 'candidateForm.errors.fileReadError';
+    if (errorMessage.includes('fila')) return 'candidateForm.errors.fileInvalidRows';
+    if (errorMessage.includes('coincide')) return 'candidateForm.errors.fileColumnMismatch';
+    return 'candidateForm.errors.fileReadError';
+  }
+
   get name() { return this.candidateForm.get('name'); }
   get surname() { return this.candidateForm.get('surname'); }
 
@@ -243,10 +259,15 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
   }
 
   get statusMessage(): string {
-    if (this.apiStatus.online) {
-      return '🟢 Servidor disponible - Datos actualizados';
+    const candidates = this.candidateDataSource.data;
+    if (candidates.length === 0) {
+      return 'status.noData';
     } else {
-      return '🔴 Servidor no disponible - Mostrando datos de respaldo';
+      return 'status.hasData';
     }
+  }
+
+  get candidateCount(): number {
+    return this.candidateDataSource.data.length;
   }
 }

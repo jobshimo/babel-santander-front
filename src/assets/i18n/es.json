@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "Sistema de Gestión de Candidatos",
+    "language": "Idioma"
+  },
+  "candidateForm": {
+    "title": "Registro de Candidato",
+    "name": "Nombre",
+    "surname": "Apellido",
+    "seniority": "Seniority",
+    "yearsOfExperience": "Años de experiencia",
+    "availability": "Disponibilidad",
+    "file": "Archivo Excel/CSV",
+    "selectFile": "Seleccionar archivo",
+    "noFileSelected": "No se ha seleccionado archivo",
+    "submit": "Registrar Candidato",
+    "refresh": "Actualizar datos",
+    "registeredCandidates": "Candidatos Registrados",
+    "loadingCandidates": "Cargando candidatos",
+    "fileProcessedCorrectly": "Archivo procesado correctamente",
+    "yes": "Sí",
+    "no": "No",
+    "fileFormatHelp": "Ayuda con formato de archivo",
+    "viewInstructions": "Ver instrucciones",
+    "fileInstructions": "El archivo debe contener exactamente una fila de datos con estas columnas:",
+    "integerNumber": "número entero",
+    "csvExample": "Ejemplo CSV",
+    "completeAllFields": "Complete todos los campos obligatorios",
+    "selectValidFile": "Seleccione un archivo válido",
+    "errors": {
+      "nameRequired": "El nombre es requerido",
+      "nameMinlength": "El nombre debe tener al menos 2 caracteres",
+      "surnameRequired": "El apellido es requerido",
+      "surnameMinlength": "El apellido debe tener al menos 2 caracteres",
+      "fileRequired": "Debe seleccionar un archivo",
+      "fileInvalidFormat": "Formato de archivo inválido. Solo se permiten archivos .xlsx y .csv",
+      "fileEmpty": "El archivo está vacío",
+      "fileInvalidColumns": "El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability",
+      "fileInvalidSeniority": "El campo seniority debe ser \"junior\" o \"senior\"",
+      "fileInvalidExperience": "El campo yearsOfExperience debe ser un número positivo",
+      "fileInvalidAvailability": "El campo availability debe ser \"true\" o \"false\"",
+      "fileReadError": "Error al leer el archivo",
+      "fileInvalidRows": "El archivo debe contener exactamente una fila de datos (puede incluir una fila de encabezado)",
+      "fileColumnMismatch": "El número de columnas no coincide"
+    },
+    "placeholders": {
+      "enterName": "Ingrese el nombre",
+      "enterSurname": "Ingrese el apellido"
+    }
+  },
+  "status": {
+    "noData": "No hay candidatos registrados",
+    "hasData": "{{count}} candidato(s) registrado(s)",
+    "loading": "Cargando",
+    "error": "Error al cargar los datos"
+  },
+  "success": {
+    "candidateRegistered": "Candidato registrado exitosamente"
+  },
+  "languages": {
+    "es": "Español",
+    "en": "English"
+  }
+}

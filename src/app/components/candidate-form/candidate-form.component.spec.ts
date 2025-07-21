@@ -6,6 +6,7 @@ import { BehaviorSubject, of, throwError } from 'rxjs';
 import { ApiStatus, CandidateResponse, FileData } from '../../models/candidate.model';
 import { CandidateService } from '../../services/candidate.service';
 import { FileService } from '../../services/file.service';
+import { getTranslocoTestingModule } from '../../testing/transloco-testing';
 import { CandidateFormComponent } from './candidate-form.component';
 
 describe('CandidateFormComponent', () => {
@@ -63,7 +64,8 @@ describe('CandidateFormComponent', () => {
       imports: [
         CandidateFormComponent,
         ReactiveFormsModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        getTranslocoTestingModule()
       ],
       providers: [
         { provide: MatSnackBar, useValue: mockSnackBar },
@@ -208,7 +210,7 @@ describe('CandidateFormComponent', () => {
 
       component.onFileSelected(event);
 
-      expect(component.fileError).toBe('Formato de archivo no soportado. Use .xlsx, .xls o .csv');
+      expect(component.fileError).toBe('candidateForm.errors.fileInvalidFormat');
       expect(component.selectedFile).toBeNull();
     });
 
@@ -221,7 +223,7 @@ describe('CandidateFormComponent', () => {
 
       component.onFileSelected(event);
 
-      expect(component.fileError).toBe(errorMessage);
+      expect(component.fileError).toBe('candidateForm.errors.fileReadError');
       expect(component.fileData).toBeNull();
     });
   });
@@ -304,7 +306,8 @@ describe('CandidateFormComponent', () => {
 
       mockApiStatusSubject.next(onlineStatus);
 
-      expect(component.statusMessage).toContain('🟢 Servidor disponible');
+
+      expect(component.statusMessage).toBe('status.hasData');
       expect(component.statusCardClass).toBe('status-online');
     });
 
@@ -317,7 +320,7 @@ describe('CandidateFormComponent', () => {
 
       mockApiStatusSubject.next(offlineStatus);
 
-      expect(component.statusMessage).toContain('🔴 Servidor no disponible');
+      expect(component.statusMessage).toBe('status.hasData');
       expect(component.statusCardClass).toBe('status-offline');
     });
 

@@ -24,6 +24,28 @@ Object.defineProperty(document.body.style, 'transform', {
   }
 });
 
+const originalError = console.error;
+const originalWarn = console.warn;
+
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation((...args) => {
+    if (args.length > 0) {
+      const firstArg = args[0];
+      if (firstArg && typeof firstArg.message === 'string' && firstArg.message.includes('Could not parse CSS stylesheet')) {
+        return;
+      }
+      if (typeof firstArg === 'string' && firstArg.includes('Could not parse CSS stylesheet')) {
+        return;
+      }
+    }
+    originalError.apply(console, args);
+  });
+
+  jest.spyOn(console, 'warn').mockImplementation((...args) => {
+    originalWarn.apply(console, args);
+  });
+});
+
 Object.defineProperty(window, 'localStorage', {
   value: {
     getItem: jest.fn(() => null),

@@ -7,13 +7,50 @@
   background-color: #1976d2;
   color: white;
   padding: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 
   h1 {
     margin: 0;
     font-size: 24px;
     font-weight: 500;
+    flex: 1;
+  }
+
+  app-language-selector {
+    ::ng-deep .language-selector .mat-mdc-form-field {
+      .mat-mdc-text-field-wrapper {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .mat-mdc-form-field-label {
+        color: rgba(255, 255, 255, 0.8) !important;
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: rgba(255, 255, 255, 0.3) !important;
+      }
+
+      &:hover {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: rgba(255, 255, 255, 0.6) !important;
+        }
+      }
+    }
+
+    ::ng-deep .mat-mdc-select-value {
+      color: white !important;
+    }
+
+    ::ng-deep .mat-mdc-select-arrow {
+      color: white !important;
+    }
   }
 }
 
