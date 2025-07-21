@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { FileData } from '../models/candidate.model';
@@ -18,8 +18,7 @@ import { FileValidationService } from './file-validation.service';
 })
 export class ExcelFileParser implements IFileParser {
   readonly supportedTypes = SUPPORTED_FILE_TYPES.EXCEL;
-
-  constructor(private readonly validationService: FileValidationService) {}
+  private readonly validationService = inject(FileValidationService);
 
   canParse(file: File): boolean {
     return this.supportedTypes.some(type =>
@@ -56,7 +55,7 @@ export class ExcelFileParser implements IFileParser {
     const worksheet = workbook.Sheets[firstSheetName];
 
     // Obtener datos como array de arrays
-    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
 
     // Validar número de filas
     const rowValidation = this.validationService.validateRowCount(rawData.length);
@@ -65,7 +64,7 @@ export class ExcelFileParser implements IFileParser {
     }
 
     // Intentar parsear como JSON con headers
-    const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
 
     let processedData: ProcessedRowData;
 
@@ -80,17 +79,17 @@ export class ExcelFileParser implements IFileParser {
     return this.validateAndConvertData(processedData);
   }
 
-  private extractDataWithHeaders(jsonRow: any, rawRow: any[]): ProcessedRowData {
+  private extractDataWithHeaders(jsonRow: Record<string, unknown>, rawRow: unknown[]): ProcessedRowData {
     // Verificar si tiene los headers esperados
-    const hasValidHeaders = jsonRow.hasOwnProperty('seniority') &&
-                           jsonRow.hasOwnProperty('yearsOfExperience') &&
-                           jsonRow.hasOwnProperty('availability');
+    const hasValidHeaders = Object.prototype.hasOwnProperty.call(jsonRow, 'seniority') &&
+                           Object.prototype.hasOwnProperty.call(jsonRow, 'yearsOfExperience') &&
+                           Object.prototype.hasOwnProperty.call(jsonRow, 'availability');
 
     if (hasValidHeaders) {
       return {
-        seniority: jsonRow.seniority,
-        yearsOfExperience: jsonRow.yearsOfExperience,
-        availability: jsonRow.availability
+        seniority: String(jsonRow['seniority']),
+        yearsOfExperience: jsonRow['yearsOfExperience'] as string | number,
+        availability: jsonRow['availability'] as string | boolean
       };
     }
 
@@ -98,16 +97,16 @@ export class ExcelFileParser implements IFileParser {
     return this.extractDataWithoutHeaders(rawRow);
   }
 
-  private extractDataWithoutHeaders(rawRow: any[]): ProcessedRowData {
+  private extractDataWithoutHeaders(rawRow: unknown[]): ProcessedRowData {
     const columnValidation = this.validationService.validateColumnCount(rawRow.length);
     if (!columnValidation.isValid) {
       throw new Error(columnValidation.errors[0]);
     }
 
     return {
-      seniority: rawRow[0],
-      yearsOfExperience: rawRow[1],
-      availability: rawRow[2]
+      seniority: String(rawRow[0]),
+      yearsOfExperience: rawRow[1] as string | number,
+      availability: rawRow[2] as string | boolean
     };
   }
 

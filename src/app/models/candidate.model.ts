@@ -14,7 +14,7 @@ export interface CandidateResponse {
   yearsOfExperience: number;
   availability: boolean;
   timestamp?: Date;
-  file?: any;
+  file?: File;
 }
 
 export interface FileData {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { FileData } from '../models/candidate.model';
@@ -16,8 +16,7 @@ import { FileParserFactory } from './file-parser.factory';
   providedIn: 'root'
 })
 export class FileService {
-
-  constructor(private readonly parserFactory: FileParserFactory) {}
+  private readonly parserFactory = inject(FileParserFactory);
 
   /**
    * Parsea un archivo de cualquier tipo soportado
@@ -74,12 +73,12 @@ export class FileService {
   /**
    * Maneja errores de parseo de manera consistente
    */
-  private handleParsingError(error: any): Observable<never> {
+  private handleParsingError(error: Error): Observable<never> {
     if (typeof error.message === 'string' && error.message.startsWith('candidateForm.errors.')) {
       return throwError(() => error);
     }
 
-    const errorMessage = error.message || error;
+    const errorMessage = error.message;
     if (errorMessage.includes(FILE_ERROR_KEYS.EMPTY)) {
       return throwError(() => new Error(FILE_ERROR_KEYS.EMPTY));
     }

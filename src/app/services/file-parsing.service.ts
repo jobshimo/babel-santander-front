@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslocoService } from '@jsverse/transloco';
 import { Observable, throwError } from 'rxjs';
@@ -18,13 +18,10 @@ import { FileService } from './file.service';
   providedIn: 'root'
 })
 export class FileParsingService {
-
-  constructor(
-    private readonly fileService: FileService,
-    private readonly errorTranslationService: ErrorTranslationService,
-    private readonly translocoService: TranslocoService,
-    private readonly snackBar: MatSnackBar
-  ) { }
+  private readonly fileService = inject(FileService);
+  private readonly errorTranslationService = inject(ErrorTranslationService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly snackBar = inject(MatSnackBar);
 
   /**
    * Parsea un archivo y muestra feedback visual al usuario
@@ -68,7 +65,7 @@ export class FileParsingService {
   /**
    * Maneja errores de parseo y muestra feedback visual
    */
-  private handleError(error: any): Observable<never> {
+  private handleError(error: Error): Observable<never> {
     const translatedErrorKey = this.errorTranslationService.getTranslatedError(error.message);
     const errorMessage = this.translocoService.translate(translatedErrorKey);
     this.showError(errorMessage);

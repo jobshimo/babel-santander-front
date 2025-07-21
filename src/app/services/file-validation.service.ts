@@ -16,8 +16,6 @@ import {
 export class FileValidationService {
   private readonly config: FileValidationConfig = DEFAULT_FILE_VALIDATION_CONFIG;
 
-  constructor() {}
-
   /**
    * Valida que el archivo tenga el número correcto de filas
    */

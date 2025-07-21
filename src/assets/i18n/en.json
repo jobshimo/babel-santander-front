@@ -22,7 +22,7 @@
     "no": "No",
     "fileFormatHelp": "File format help",
     "viewInstructions": "View instructions",
-    "fileInstructions": "The file must contain exactly one data row with these columns:",
+    "fileInstructions": "The file must contain exactly one data row with these columns (may optionally include a header row):",
     "integerNumber": "integer number",
     "csvExample": "CSV Example",
     "completeAllFields": "Complete all required fields",
@@ -50,8 +50,8 @@
     "cachedDataMessage": "📂 Backup data"
   },
   "status": {
-    "noData": "No candidates registered",
-    "hasData": "{{count}} candidate(s) registered",
+    "noData": "✅ No candidates registered - Server active",
+    "hasData": "✅ {{count}} candidate(s) registered - Server active",
     "hasDataOffline": "⚠️ {{count}} candidate(s) registered - Showing backup data (server unavailable)",
     "noDataOffline": "❌ No data available - Server unavailable",
     "loading": "Loading",

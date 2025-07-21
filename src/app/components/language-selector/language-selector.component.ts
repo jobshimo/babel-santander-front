@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -26,14 +26,11 @@ import { LanguageService } from '../../services/language.service';
   `]
 })
 export class LanguageSelectorComponent implements OnInit {
-  currentLanguage: string = '';
-  availableLanguages: any[] = [];
+  currentLanguage = '';
+  availableLanguages: {code: string; name: string}[] = [];
 
-  constructor(
-    private languageService: LanguageService,
-    private translocoService: TranslocoService
-  ) {
-  }
+  private languageService = inject(LanguageService);
+  private translocoService = inject(TranslocoService);
 
   ngOnInit() {
     this.languageService.initializeLanguage();

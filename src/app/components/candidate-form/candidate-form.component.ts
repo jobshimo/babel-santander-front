@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -35,7 +35,7 @@ import { NotificationService } from '../../services/notification.service';
   templateUrl: './candidate-form.component.html',
   styleUrls: ['./candidate-form.component.scss']
 })
-export class CandidateFormComponent implements OnInit, OnDestroy {
+export class CandidateFormComponent implements OnDestroy {
   candidateForm: FormGroup;
   selectedFile: File | null = null;
   fileData: FileData | null = null;
@@ -43,23 +43,18 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
   fileError: string | null = null;
 
   private destroy$ = new Subject<void>();
+  private fb = inject(FormBuilder);
+  private candidateService = inject(CandidateService);
+  private candidateStateService = inject(CandidateStateService);
+  private translocoService = inject(TranslocoService);
+  private fileParsingService = inject(FileParsingService);
+  private notificationService = inject(NotificationService);
 
-  constructor(
-    private fb: FormBuilder,
-    private candidateService: CandidateService,
-    private candidateStateService: CandidateStateService,
-    private translocoService: TranslocoService,
-    private fileParsingService: FileParsingService,
-    private notificationService: NotificationService
-  ) {
+  constructor() {
     this.candidateForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       surname: ['', [Validators.required, Validators.minLength(2)]]
     });
-  }
-
-  ngOnInit(): void {
-    // No necesitamos suscribirnos a datos aquí, eso lo maneja el componente tabla
   }
 
   ngOnDestroy(): void {
@@ -67,8 +62,9 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (file) {
       this.selectedFile = file;
       this.fileError = null;

@@ -1,12 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LanguageService {
-
-  constructor(private translocoService: TranslocoService) {}
+  private translocoService = inject(TranslocoService);
 
   setLanguage(lang: string): void {
     this.translocoService.setActiveLang(lang);

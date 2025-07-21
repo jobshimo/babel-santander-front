@@ -22,7 +22,7 @@
     "no": "No",
     "fileFormatHelp": "Ayuda con formato de archivo",
     "viewInstructions": "Ver instrucciones",
-    "fileInstructions": "El archivo debe contener exactamente una fila de datos con estas columnas:",
+    "fileInstructions": "El archivo debe contener exactamente una fila de datos con estas columnas (opcionalmente puede incluir una fila de encabezados):",
     "integerNumber": "número entero",
     "csvExample": "Ejemplo CSV",
     "completeAllFields": "Complete todos los campos obligatorios",
@@ -50,13 +50,14 @@
     "cachedDataMessage": "📂 Datos de respaldo"
   },
   "status": {
-    "noData": "No hay candidatos registrados",
-    "hasData": "{{count}} candidato(s) registrado(s)",
+    "noData": "✅ No hay candidatos registrados - Servidor activo",
+    "hasData": "✅ {{count}} candidato(s) registrado(s) - Servidor activo",
     "hasDataOffline": "⚠️ {{count}} candidato(s) registrado(s) - Mostrando datos de respaldo (servidor no disponible)",
     "noDataOffline": "❌ No hay datos disponibles - Servidor no disponible",
     "loading": "Cargando",
     "error": "Error al cargar los datos",
     "serverReconnected": "✅ Servidor reconectado - Datos actualizados",
+    "cachedDataMessage": "📂 Datos de respaldo",
     "noDataAndServerDown": "❌ No hay datos disponibles y el servidor no responde",
     "unknown": "desconocida"
   },

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
@@ -18,11 +18,9 @@ export class CandidateStateService {
   public isLoading$ = this.isLoadingSubject.asObservable();
   public refreshTrigger$ = this.refreshTriggerSubject.asObservable();
 
-  constructor(
-    private candidateService: CandidateService,
-    private notificationService: NotificationService,
-    private translocoService: TranslocoService
-  ) {}
+  private candidateService = inject(CandidateService);
+  private notificationService = inject(NotificationService);
+  private translocoService = inject(TranslocoService);
 
   get currentCandidates(): CandidateResponse[] {
     return this.candidateDataSubject.value;

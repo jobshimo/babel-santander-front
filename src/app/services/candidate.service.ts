@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { catchError, map, takeUntil, tap } from 'rxjs/operators';
 import { ApiStatus, Candidate, CandidateResponse } from '../models/candidate.model';
@@ -21,8 +21,9 @@ export class CandidateService implements OnDestroy {
   public apiStatus$ = this.apiStatusSubject.asObservable();
 
   private destroy$ = new Subject<void>();
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.loadCachedApiStatus();
   }
 

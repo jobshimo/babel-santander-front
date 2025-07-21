@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { IFileParser } from '../models/file-parser.model';
 import { CsvFileParser } from './csv-parser.service';
 import { ExcelFileParser } from './excel-parser.service';
@@ -10,12 +10,11 @@ import { ExcelFileParser } from './excel-parser.service';
   providedIn: 'root'
 })
 export class FileParserFactory {
+  private readonly excelParser = inject(ExcelFileParser);
+  private readonly csvParser = inject(CsvFileParser);
   private readonly parsers: readonly IFileParser[];
 
-  constructor(
-    private readonly excelParser: ExcelFileParser,
-    private readonly csvParser: CsvFileParser
-  ) {
+  constructor() {
     this.parsers = [this.excelParser, this.csvParser];
   }
 

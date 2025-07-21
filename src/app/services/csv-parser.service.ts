@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FileData } from '../models/candidate.model';
 import {
@@ -17,8 +17,7 @@ import { FileValidationService } from './file-validation.service';
 })
 export class CsvFileParser implements IFileParser {
   readonly supportedTypes = SUPPORTED_FILE_TYPES.CSV;
-
-  constructor(private readonly validationService: FileValidationService) {}
+  private readonly validationService = inject(FileValidationService);
 
   canParse(file: File): boolean {
     return this.supportedTypes.some(type =>
@@ -83,9 +82,7 @@ export class CsvFileParser implements IFileParser {
     let current = '';
     let inQuotes = false;
 
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-
+    for (const char of line) {
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === ',' && !inQuotes) {
@@ -106,7 +103,7 @@ export class CsvFileParser implements IFileParser {
 
     if (headerValidation.isValid) {
       // Crear objeto con headers
-      const dataObject: any = {};
+      const dataObject: Record<string, string> = {};
       firstLine.forEach((header, index) => {
         const normalizedHeader = header.trim().toLowerCase();
         if (['seniority', 'yearsofexperience', 'availability'].includes(normalizedHeader)) {
@@ -119,9 +116,9 @@ export class CsvFileParser implements IFileParser {
       });
 
       return {
-        seniority: dataObject.seniority,
-        yearsOfExperience: dataObject.yearsOfExperience,
-        availability: dataObject.availability
+        seniority: dataObject['seniority'],
+        yearsOfExperience: dataObject['yearsOfExperience'],
+        availability: dataObject['availability']
       };
     }
 

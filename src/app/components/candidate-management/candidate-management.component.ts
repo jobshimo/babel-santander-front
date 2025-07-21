@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -30,13 +30,10 @@ import { CandidateTableComponent } from '../candidate-table/candidate-table.comp
 })
 export class CandidateManagementComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private candidateStateService: CandidateStateService,
-    private candidateService: CandidateService,
-    private notificationService: NotificationService,
-    private translocoService: TranslocoService
-  ) {}
+  private candidateStateService = inject(CandidateStateService);
+  private candidateService = inject(CandidateService);
+  private notificationService = inject(NotificationService);
+  private translocoService = inject(TranslocoService);
 
   ngOnInit(): void {
     // Escuchar cambios en el estado de la API

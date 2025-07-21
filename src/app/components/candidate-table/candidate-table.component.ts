@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,8 +32,7 @@ export class CandidateTableComponent implements OnInit, OnDestroy {
   isLoading = false;
 
   private destroy$ = new Subject<void>();
-
-  constructor(private candidateStateService: CandidateStateService) {}
+  private candidateStateService = inject(CandidateStateService);
 
   ngOnInit(): void {
     // Escuchar cambios en los datos
