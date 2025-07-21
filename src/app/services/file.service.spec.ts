@@ -105,7 +105,7 @@ describe('FileService', () => {
           fail('Should have thrown an error for missing columns');
         },
         error: (error) => {
-          expect(error.message).toContain('debe contener las columnas: seniority, yearsOfExperience, availability');
+          expect(error.message).toContain('debe contener exactamente 3 columnas');
           done();
         }
       });
@@ -120,7 +120,7 @@ describe('FileService', () => {
           fail('Should have thrown an error for multiple data rows');
         },
         error: (error) => {
-          expect(error.message).toContain('debe contener exactamente una fila de datos');
+          expect(error.message).toContain('debe contener exactamente una fila de datos (puede incluir');
           done();
         }
       });
@@ -132,10 +132,10 @@ describe('FileService', () => {
 
       service.parseCSVFile(file).subscribe({
         next: () => {
-          fail('Should have thrown an error for no data rows');
+          fail('Should have thrown an error for invalid seniority value');
         },
         error: (error) => {
-          expect(error.message).toContain('debe contener exactamente una fila de datos');
+          expect(error.message).toContain('seniority debe ser "junior" o "senior"');
           done();
         }
       });
@@ -151,6 +151,38 @@ describe('FileService', () => {
         },
         error: (error) => {
           expect(error.message).toContain('yearsOfExperience debe ser un número positivo');
+          done();
+        }
+      });
+    });
+
+    it('should parse CSV file without headers', (done) => {
+      const csvContent = 'senior,7,false';
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+
+      service.parseCSVFile(file).subscribe({
+        next: (result: FileData) => {
+          expect(result.seniority).toBe('senior');
+          expect(result.yearsOfExperience).toBe(7);
+          expect(result.availability).toBe(false);
+          done();
+        },
+        error: (error) => {
+          fail(error.message);
+        }
+      });
+    });
+
+    it('should reject CSV without headers if wrong number of columns', (done) => {
+      const csvContent = 'senior,7';
+      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+
+      service.parseCSVFile(file).subscribe({
+        next: () => {
+          fail('Should have thrown an error for wrong number of columns');
+        },
+        error: (error) => {
+          expect(error.message).toContain('debe contener exactamente 3 columnas');
           done();
         }
       });

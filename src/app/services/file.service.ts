@@ -18,20 +18,57 @@ export class FileService {
           const workbook = XLSX.read(data, { type: 'array' });
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-          if (jsonData.length !== 1) {
-            observer.error(new Error('El archivo debe contener exactamente una fila de datos'));
+          const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (rawData.length === 0) {
+            observer.error(new Error('El archivo está vacío'));
             return;
           }
 
-          const row = jsonData[0] as any;
-
-          if (!row.hasOwnProperty('seniority') ||
-              !row.hasOwnProperty('yearsOfExperience') ||
-              !row.hasOwnProperty('availability')) {
-            observer.error(new Error('El archivo debe contener las columnas: seniority, yearsOfExperience, availability'));
+          if (rawData.length > 1) {
+            observer.error(new Error('El archivo debe contener exactamente una fila de datos (puede incluir una fila de encabezado)'));
             return;
+          }
+
+          let row: any;
+
+          let jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          if (jsonData.length > 0) {
+            row = jsonData[0] as any;
+
+            const hasValidHeaders = row.hasOwnProperty('seniority') &&
+                                   row.hasOwnProperty('yearsOfExperience') &&
+                                   row.hasOwnProperty('availability');
+
+            if (!hasValidHeaders) {
+              const rawRow = rawData[0] as any[];
+
+              if (rawRow.length !== 3) {
+                observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
+                return;
+              }
+
+              row = {
+                seniority: rawRow[0],
+                yearsOfExperience: rawRow[1],
+                availability: rawRow[2]
+              };
+            }
+          } else {
+            const rawRow = rawData[0] as any[];
+
+            if (rawRow.length !== 3) {
+              observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
+              return;
+            }
+
+            row = {
+              seniority: rawRow[0],
+              yearsOfExperience: rawRow[1],
+              availability: rawRow[2]
+            };
           }
 
           if (row.seniority !== 'junior' && row.seniority !== 'senior') {
@@ -39,20 +76,35 @@ export class FileService {
             return;
           }
 
-          if (typeof row.yearsOfExperience !== 'number' || row.yearsOfExperience < 0) {
+          let yearsOfExperience = row.yearsOfExperience;
+          if (typeof yearsOfExperience === 'string') {
+            yearsOfExperience = parseInt(yearsOfExperience, 10);
+          }
+          if (typeof yearsOfExperience !== 'number' || isNaN(yearsOfExperience) || yearsOfExperience < 0) {
             observer.error(new Error('El campo yearsOfExperience debe ser un número positivo'));
             return;
           }
 
-          if (typeof row.availability !== 'boolean') {
+          let availability = row.availability;
+          if (typeof availability === 'string') {
+            const lowerAvailability = availability.toLowerCase();
+            if (lowerAvailability === 'true') {
+              availability = true;
+            } else if (lowerAvailability === 'false') {
+              availability = false;
+            } else {
+              observer.error(new Error('El campo availability debe ser "true" o "false"'));
+              return;
+            }
+          } else if (typeof availability !== 'boolean') {
             observer.error(new Error('El campo availability debe ser un booleano'));
             return;
           }
 
           const fileData: FileData = {
             seniority: row.seniority,
-            yearsOfExperience: row.yearsOfExperience,
-            availability: row.availability
+            yearsOfExperience: yearsOfExperience,
+            availability: availability
           };
 
           observer.next(fileData);
@@ -79,29 +131,62 @@ export class FileService {
           const csvData = e.target?.result as string;
           const lines = csvData.split('\n').filter(line => line.trim() !== '');
 
-          if (lines.length !== 2) {
-            observer.error(new Error('El archivo CSV debe contener exactamente una fila de datos (además del encabezado)'));
+          if (lines.length === 0) {
+            observer.error(new Error('El archivo está vacío'));
             return;
           }
 
-          const headers = lines[0].split(',').map(h => h.trim());
-          const values = lines[1].split(',').map(v => v.trim());
-
-          if (headers.length !== values.length) {
-            observer.error(new Error('El número de columnas no coincide'));
+          if (lines.length > 2) {
+            observer.error(new Error('El archivo debe contener exactamente una fila de datos (puede incluir una fila de encabezado)'));
             return;
           }
 
-          const row: any = {};
-          headers.forEach((header, index) => {
-            row[header] = values[index];
-          });
+          let row: any = {};
 
-          if (!row.hasOwnProperty('seniority') ||
-              !row.hasOwnProperty('yearsOfExperience') ||
-              !row.hasOwnProperty('availability')) {
-            observer.error(new Error('El archivo debe contener las columnas: seniority, yearsOfExperience, availability'));
-            return;
+          if (lines.length === 2) {
+            const headers = lines[0].split(',').map(h => h.trim());
+            const values = lines[1].split(',').map(v => v.trim());
+
+            if (headers.length !== values.length) {
+              observer.error(new Error('El número de columnas no coincide'));
+              return;
+            }
+
+            headers.forEach((header, index) => {
+              row[header] = values[index];
+            });
+
+            const hasValidHeaders = row.hasOwnProperty('seniority') &&
+                                   row.hasOwnProperty('yearsOfExperience') &&
+                                   row.hasOwnProperty('availability');
+
+            if (!hasValidHeaders) {
+              const values = lines[0].split(',').map(v => v.trim());
+
+              if (values.length !== 3) {
+                observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
+                return;
+              }
+
+              row = {
+                seniority: values[0],
+                yearsOfExperience: values[1],
+                availability: values[2]
+              };
+            }
+          } else {
+            const values = lines[0].split(',').map(v => v.trim());
+
+            if (values.length !== 3) {
+              observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
+              return;
+            }
+
+            row = {
+              seniority: values[0],
+              yearsOfExperience: values[1],
+              availability: values[2]
+            };
           }
 
           if (row.seniority !== 'junior' && row.seniority !== 'senior') {
