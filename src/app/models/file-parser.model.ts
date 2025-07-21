@@ -53,7 +53,7 @@ export interface ProcessedRowData {
  */
 export const DEFAULT_FILE_VALIDATION_CONFIG: FileValidationConfig = {
   requiredColumns: ['seniority', 'yearsOfExperience', 'availability'],
-  maxRows: 2, // Una fila de datos + posible header
+  maxRows: 2,
   minRows: 1,
   supportedSeniorityValues: ['junior', 'senior']
 } as const;

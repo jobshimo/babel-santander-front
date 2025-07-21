@@ -98,7 +98,6 @@ export class CandidateFormComponent implements OnDestroy {
         tap(() => {
           this.notificationService.showSuccess(this.translocoService.translate('success.candidateRegistered'));
           this.resetForm();
-          // Refrescar datos a través del servicio centralizado
           this.candidateStateService.loadCandidates();
         }),
         catchError(() => {

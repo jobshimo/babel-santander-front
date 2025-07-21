@@ -36,7 +36,6 @@ export class CandidateManagementComponent implements OnInit, OnDestroy {
   private translocoService = inject(TranslocoService);
 
   ngOnInit(): void {
-    // Escuchar cambios en el estado de la API
     this.candidateService.apiStatus$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(status => {
@@ -49,7 +48,6 @@ export class CandidateManagementComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Cargar datos iniciales
     this.candidateStateService.loadCandidates();
   }
 

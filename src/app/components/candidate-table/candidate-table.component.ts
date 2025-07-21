@@ -35,14 +35,12 @@ export class CandidateTableComponent implements OnInit, OnDestroy {
   private candidateStateService = inject(CandidateStateService);
 
   ngOnInit(): void {
-    // Escuchar cambios en los datos
     this.candidateStateService.candidateData$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(data => {
       this.candidateDataSource.data = data;
     });
 
-    // Escuchar estado de carga
     this.candidateStateService.isLoading$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(loading => {

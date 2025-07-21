@@ -33,21 +33,18 @@ export class CandidateCheckComponent implements OnInit, OnDestroy {
   private candidateStateService = inject(CandidateStateService);
 
   ngOnInit(): void {
-    // Escuchar cambios en el estado de la API
     this.candidateService.apiStatus$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(status => {
       this.apiStatus = status;
     });
 
-    // Escuchar cambios en los datos para actualizar el contador
     this.candidateStateService.candidateData$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(data => {
       this.candidateCount = data.length;
     });
 
-    // Escuchar estado de carga
     this.candidateStateService.isLoading$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(loading => {

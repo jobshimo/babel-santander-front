@@ -54,25 +54,22 @@ export class ExcelFileParser implements IFileParser {
     const firstSheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[firstSheetName];
 
-    // Obtener datos como array de arrays
+
     const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
 
-    // Validar número de filas
+
     const rowValidation = this.validationService.validateRowCount(rawData.length);
     if (!rowValidation.isValid) {
       throw new Error(rowValidation.errors[0]);
     }
 
-    // Intentar parsear como JSON con headers
     const jsonData = XLSX.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
 
     let processedData: ProcessedRowData;
 
     if (jsonData.length > 0) {
-      // El archivo tiene headers válidos
       processedData = this.extractDataWithHeaders(jsonData[0], rawData[0]);
     } else {
-      // El archivo no tiene headers o no son válidos
       processedData = this.extractDataWithoutHeaders(rawData[0]);
     }
 
@@ -80,7 +77,6 @@ export class ExcelFileParser implements IFileParser {
   }
 
   private extractDataWithHeaders(jsonRow: Record<string, unknown>, rawRow: unknown[]): ProcessedRowData {
-    // Verificar si tiene los headers esperados
     const hasValidHeaders = Object.prototype.hasOwnProperty.call(jsonRow, 'seniority') &&
                            Object.prototype.hasOwnProperty.call(jsonRow, 'yearsOfExperience') &&
                            Object.prototype.hasOwnProperty.call(jsonRow, 'availability');
@@ -93,7 +89,6 @@ export class ExcelFileParser implements IFileParser {
       };
     }
 
-    // Si no tiene headers válidos, tratar como datos sin header
     return this.extractDataWithoutHeaders(rawRow);
   }
 
@@ -111,10 +106,7 @@ export class ExcelFileParser implements IFileParser {
   }
 
   private validateAndConvertData(data: ProcessedRowData): FileData {
-    // Normalizar datos
     const normalizedData = this.validationService.normalizeRowData(data);
-
-    // Validar datos normalizados
     const validation = this.validationService.validateRowData(normalizedData);
     if (!validation.isValid) {
       throw new Error(validation.errors[0]);

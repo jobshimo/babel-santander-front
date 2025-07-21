@@ -29,7 +29,6 @@ export class FileParsingService {
    * @returns Observable con los datos del archivo
    */
   parseFile(file: File): Observable<FileData> {
-    // Verificar si el archivo es soportado
     if (!this.fileService.isFileSupported(file)) {
       const errorKey = 'candidateForm.errors.fileInvalidFormat';
       const errorMessage = this.translocoService.translate(errorKey);

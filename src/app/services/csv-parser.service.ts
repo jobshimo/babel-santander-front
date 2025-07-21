@@ -50,7 +50,7 @@ export class CsvFileParser implements IFileParser {
   private processCsvFile(csvContent: string): FileData {
     const lines = this.parseCSVLines(csvContent);
 
-    // Validar número de filas
+
     const rowValidation = this.validationService.validateRowCount(lines.length);
     if (!rowValidation.isValid) {
       throw new Error(rowValidation.errors[0]);
@@ -59,10 +59,8 @@ export class CsvFileParser implements IFileParser {
     let processedData: ProcessedRowData;
 
     if (lines.length === 2) {
-      // Posible header + data
       processedData = this.extractDataWithPossibleHeaders(lines[0], lines[1]);
     } else {
-      // Solo una línea de datos
       processedData = this.extractDataWithoutHeaders(lines[0]);
     }
 
@@ -77,7 +75,6 @@ export class CsvFileParser implements IFileParser {
   }
 
   private parseCSVLine(line: string): string[] {
-    // Parser simple para CSV - maneja comillas básicas
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
@@ -94,15 +91,13 @@ export class CsvFileParser implements IFileParser {
     }
 
     result.push(current.trim());
-    return result.map(value => value.replace(/^"|"$/g, '')); // Remover comillas
+    return result.map(value => value.replace(/^"|"$/g, ''));
   }
 
   private extractDataWithPossibleHeaders(firstLine: string[], secondLine: string[]): ProcessedRowData {
-    // Verificar si la primera línea son headers válidos
     const headerValidation = this.validationService.validateHeaders(firstLine);
 
     if (headerValidation.isValid) {
-      // Crear objeto con headers
       const dataObject: Record<string, string> = {};
       firstLine.forEach((header, index) => {
         const normalizedHeader = header.trim().toLowerCase();
@@ -122,7 +117,6 @@ export class CsvFileParser implements IFileParser {
       };
     }
 
-    // Si no son headers válidos, tratar primera línea como datos
     return this.extractDataWithoutHeaders(firstLine);
   }
 
@@ -140,10 +134,8 @@ export class CsvFileParser implements IFileParser {
   }
 
   private validateAndConvertData(data: ProcessedRowData): FileData {
-    // Normalizar datos
     const normalizedData = this.validationService.normalizeRowData(data);
 
-    // Validar datos normalizados
     const validation = this.validationService.validateRowData(normalizedData);
     if (!validation.isValid) {
       throw new Error(validation.errors[0]);
