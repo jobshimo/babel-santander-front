@@ -1,6 +1,24 @@
 /* Table Card Styles */
 .table-card {
   margin-top: 1.5rem;
+  margin-bottom: 20px;
+
+  mat-card-title {
+    color: #1976d2 !important;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .refresh-btn {
+      color: #1976d2 !important;
+
+      mat-icon {
+        color: #1976d2 !important;
+      }
+    }
+  }
 }
 
 .mat-card-header {

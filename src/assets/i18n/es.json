@@ -46,13 +46,17 @@
     "placeholders": {
       "enterName": "Ingrese el nombre",
       "enterSurname": "Ingrese el apellido"
-    }
+    },
+    "cachedDataMessage": "📂 Datos de respaldo"
   },
   "status": {
     "noData": "No hay candidatos registrados",
     "hasData": "{{count}} candidato(s) registrado(s)",
     "loading": "Cargando",
-    "error": "Error al cargar los datos"
+    "error": "Error al cargar los datos",
+    "serverReconnected": "✅ Servidor reconectado - Datos actualizados",
+    "noDataAndServerDown": "❌ No hay datos disponibles y el servidor no responde",
+    "unknown": "desconocida"
   },
   "success": {
     "candidateRegistered": "Candidato registrado exitosamente"

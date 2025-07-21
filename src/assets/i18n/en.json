@@ -46,13 +46,17 @@
     "placeholders": {
       "enterName": "Enter name",
       "enterSurname": "Enter surname"
-    }
+    },
+    "cachedDataMessage": "📂 Backup data"
   },
   "status": {
     "noData": "No candidates registered",
     "hasData": "{{count}} candidate(s) registered",
     "loading": "Loading",
-    "error": "Error loading data"
+    "error": "Error loading data",
+    "serverReconnected": "✅ Server reconnected - Data updated",
+    "noDataAndServerDown": "❌ No data available and server is not responding",
+    "unknown": "unknown"
   },
   "success": {
     "candidateRegistered": "Candidate registered successfully"

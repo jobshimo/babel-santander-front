@@ -53,7 +53,11 @@ export const translations = {
       "noData": "No hay candidatos registrados",
       "hasData": "{{count}} candidato(s) registrado(s)",
       "loading": "Cargando",
-      "error": "Error al cargar los datos"
+      "error": "Error al cargar los datos",
+      "serverReconnected": "✅ Servidor reconectado - Datos actualizados",
+      "cachedDataMessage": "📂 Datos de respaldo",
+      "noDataAndServerDown": "❌ No hay datos disponibles y el servidor no responde",
+      "unknown": "desconocida"
     },
     "success": {
       "candidateRegistered": "Candidato registrado exitosamente"
@@ -117,7 +121,11 @@ export const translations = {
       "noData": "No candidates registered",
       "hasData": "{{count}} candidate(s) registered",
       "loading": "Loading",
-      "error": "Error loading data"
+      "error": "Error loading data",
+      "serverReconnected": "✅ Server reconnected - Data updated",
+      "cachedDataMessage": "📂 Backup data",
+      "noDataAndServerDown": "❌ No data available and server is not responding",
+      "unknown": "unknown"
     },
     "success": {
       "candidateRegistered": "Candidate registered successfully"

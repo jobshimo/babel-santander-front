@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
 import { CandidateResponse } from '../models/candidate.model';
@@ -19,7 +20,8 @@ export class CandidateStateService {
 
   constructor(
     private candidateService: CandidateService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private translocoService: TranslocoService
   ) {}
 
   get currentCandidates(): CandidateResponse[] {
@@ -38,20 +40,22 @@ export class CandidateStateService {
       this.candidateDataSubject.next(cachedInfo.candidates);
       const lastUpdate = cachedInfo.lastUpdated
         ? new Date(cachedInfo.lastUpdated).toLocaleString()
-        : 'desconocida';
-      this.notificationService.showWarning(`📂 Datos de respaldo (última actualización: ${lastUpdate})`);
+        : this.translocoService.translate('status.unknown');
+
+      const baseMessage = this.translocoService.translate('status.cachedDataMessage');
+      const message = `${baseMessage} (última actualización: ${lastUpdate})`;
+      this.notificationService.showWarning(message);
     } else {
       this.isLoadingSubject.next(true);
-    }
-
-    this.candidateService.getAllCandidates().pipe(
+    }    this.candidateService.getAllCandidates().pipe(
       tap(freshCandidates => {
         this.candidateDataSubject.next(freshCandidates);
       }),
       catchError(error => {
         console.error('Servidor no disponible:', error);
         if (!hasCachedData) {
-          this.notificationService.showError('❌ No hay datos disponibles y el servidor no responde');
+          const message = this.translocoService.translate('status.noDataAndServerDown');
+          this.notificationService.showError(message);
         }
         return [];
       }),

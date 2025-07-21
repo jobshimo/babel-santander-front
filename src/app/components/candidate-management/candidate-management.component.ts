@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CandidateStateService } from '../../services/candidate-state.service';
@@ -33,7 +34,8 @@ export class CandidateManagementComponent implements OnInit, OnDestroy {
   constructor(
     private candidateStateService: CandidateStateService,
     private candidateService: CandidateService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private translocoService: TranslocoService
   ) {}
 
   ngOnInit(): void {
@@ -44,7 +46,8 @@ export class CandidateManagementComponent implements OnInit, OnDestroy {
       if (status.online && !status.usingCachedData) {
         const hasData = this.candidateStateService.currentCandidates.length > 0;
         if (hasData) {
-          this.notificationService.showSuccess('✅ Servidor reconectado - Datos actualizados');
+          const message = this.translocoService.translate('status.serverReconnected');
+          this.notificationService.showSuccess(message);
         }
       }
     });
