@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { CandidateFormComponent } from './components/candidate-form/candidate-form.component';
+import { CandidateManagementComponent } from './components/candidate-management/candidate-management.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/candidates', pathMatch: 'full' },
-  { path: 'candidates', component: CandidateFormComponent },
+  { path: 'candidates', component: CandidateManagementComponent },
   { path: '**', redirectTo: '/candidates' }
 ];

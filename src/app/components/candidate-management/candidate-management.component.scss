@@ -1,0 +1,16 @@
+/* Candidate Management Container */
+.candidate-management-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .candidate-management-container {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+}

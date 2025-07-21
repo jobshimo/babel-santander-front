@@ -1,0 +1,12 @@
+<div class="candidate-check-container">
+  <mat-card [class]="'status-card ' + statusCardClass" class="mb-3">
+    <mat-card-content>
+      <div class="status-content">
+        <span>{{ statusMessage | transloco: { count: candidateCount } }}</span>
+        <button mat-icon-button (click)="refreshData()" [disabled]="isLoading">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

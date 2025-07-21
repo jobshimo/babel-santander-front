@@ -1,198 +1,110 @@
-<div class="candidate-form-container">
-  <mat-card [class]="'status-card ' + statusCardClass" class="mb-3">
-    <mat-card-content>
-      <div class="status-content">
-        <span>{{ statusMessage | transloco: { count: candidateCount } }}</span>
-        <button mat-icon-button (click)="refreshData()" [disabled]="isLoadingCandidates">
-          <mat-icon>refresh</mat-icon>
-        </button>
+<mat-card class="form-card">
+  <mat-card-header>
+    <mat-card-title>{{ 'candidateForm.title' | transloco }}</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="candidateForm" (ngSubmit)="onSubmit()" class="candidate-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'candidateForm.name' | transloco }}</mat-label>
+          <input matInput formControlName="name" [placeholder]="'candidateForm.placeholders.enterName' | transloco">
+          <mat-error *ngIf="name?.hasError('required')">
+            {{ 'candidateForm.errors.nameRequired' | transloco }}
+          </mat-error>
+          <mat-error *ngIf="name?.hasError('minlength')">
+            {{ 'candidateForm.errors.nameMinlength' | transloco }}
+          </mat-error>
+        </mat-form-field>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <mat-card class="form-card">
-    <mat-card-header>
-      <mat-card-title>{{ 'candidateForm.title' | transloco }}</mat-card-title>
-    </mat-card-header>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'candidateForm.surname' | transloco }}</mat-label>
+          <input matInput formControlName="surname" [placeholder]="'candidateForm.placeholders.enterSurname' | transloco">
+          <mat-error *ngIf="surname?.hasError('required')">
+            {{ 'candidateForm.errors.surnameRequired' | transloco }}
+          </mat-error>
+          <mat-error *ngIf="surname?.hasError('minlength')">
+            {{ 'candidateForm.errors.surnameMinlength' | transloco }}
+          </mat-error>
+        </mat-form-field>
+      </div>
 
-    <mat-card-content>
-      <form [formGroup]="candidateForm" (ngSubmit)="onSubmit()" class="candidate-form">
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{ 'candidateForm.name' | transloco }}</mat-label>
-            <input matInput formControlName="name" [placeholder]="'candidateForm.placeholders.enterName' | transloco">
-            <mat-error *ngIf="name?.hasError('required')">
-              {{ 'candidateForm.errors.nameRequired' | transloco }}
-            </mat-error>
-            <mat-error *ngIf="name?.hasError('minlength')">
-              {{ 'candidateForm.errors.nameMinlength' | transloco }}
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{ 'candidateForm.surname' | transloco }}</mat-label>
-            <input matInput formControlName="surname" [placeholder]="'candidateForm.placeholders.enterSurname' | transloco">
-            <mat-error *ngIf="surname?.hasError('required')">
-              {{ 'candidateForm.errors.surnameRequired' | transloco }}
-            </mat-error>
-            <mat-error *ngIf="surname?.hasError('minlength')">
-              {{ 'candidateForm.errors.surnameMinlength' | transloco }}
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{ 'candidateForm.file' | transloco }}</mat-label>
-            <input matInput readonly [value]="selectedFile?.name || ('candidateForm.noFileSelected' | transloco)">
-            <button mat-icon-button matSuffix (click)="fileInput.click()" type="button">
-              <mat-icon>upload_file</mat-icon>
-            </button>
-            <mat-error *ngIf="fileError">
-              {{ fileError | transloco }}
-            </mat-error>
-          </mat-form-field>
-          <input #fileInput type="file" id="fileInput" hidden accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)">
-        </div>
-
-
-        <div *ngIf="fileError" class="file-error-message">
-          <mat-icon>error</mat-icon>
-          <span>{{ fileError | transloco }}</span>
-        </div>
-
-
-        <div *ngIf="fileData && !fileError" class="file-info">
-          <mat-card class="info-card success">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>check_circle</mat-icon>
-                {{ 'candidateForm.fileProcessedCorrectly' | transloco }}
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p><strong>Seniority:</strong> {{ fileData.seniority }}</p>
-              <p><strong>{{ 'candidateForm.yearsOfExperience' | transloco }}:</strong> {{ fileData.yearsOfExperience }}</p>
-              <p><strong>{{ 'candidateForm.availability' | transloco }}:</strong> {{ fileData.availability ? ('candidateForm.yes' | transloco) : ('candidateForm.no' | transloco) }}</p>
-            </mat-card-content>
-          </mat-card>
-        </div>
-
-
-        <div *ngIf="!selectedFile" class="file-instructions">
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon>help_outline</mat-icon>
-                {{ 'candidateForm.fileFormatHelp' | transloco }}
-              </mat-panel-title>
-              <mat-panel-description>
-                {{ 'candidateForm.viewInstructions' | transloco }}
-              </mat-panel-description>
-            </mat-expansion-panel-header>
-
-            <div class="instructions-content">
-              <p>{{ 'candidateForm.fileInstructions' | transloco }}</p>
-              <ul>
-                <li><code>seniority</code>: "junior" o "senior"</li>
-                <li><code>yearsOfExperience</code>: {{ 'candidateForm.integerNumber' | transloco }}</li>
-                <li><code>availability</code>: true o false</li>
-              </ul>
-              <p><strong>{{ 'candidateForm.csvExample' | transloco }}:</strong></p>
-              <pre>seniority,yearsOfExperience,availability
-junior,3,true</pre>
-            </div>
-          </mat-expansion-panel>
-        </div>
-
-
-        <div class="form-actions">
-          <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmit">
-            <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
-            <span *ngIf="!isLoading">{{ 'candidateForm.submit' | transloco }}</span>
-            <span *ngIf="isLoading">{{ 'status.loading' | transloco }}...</span>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'candidateForm.file' | transloco }}</mat-label>
+          <input matInput readonly [value]="selectedFile?.name || ('candidateForm.noFileSelected' | transloco)">
+          <button mat-icon-button matSuffix (click)="fileInput.click()" type="button">
+            <mat-icon>upload_file</mat-icon>
           </button>
+          <mat-error *ngIf="fileError">
+            {{ fileError | transloco }}
+          </mat-error>
+        </mat-form-field>
+        <input #fileInput type="file" id="fileInput" hidden accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)">
+      </div>
 
+      <div *ngIf="fileError" class="file-error-message">
+        <mat-icon>error</mat-icon>
+        <span>{{ fileError | transloco }}</span>
+      </div>
 
-          <div *ngIf="!canSubmit && !isLoading" class="button-status">
-            <mat-icon>info</mat-icon>
-            <span *ngIf="!candidateForm.valid">{{ 'candidateForm.completeAllFields' | transloco }}</span>
-            <span *ngIf="candidateForm.valid && !selectedFile">{{ 'candidateForm.selectValidFile' | transloco }}</span>
+      <div *ngIf="fileData && !fileError" class="file-info">
+        <mat-card class="info-card success">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>check_circle</mat-icon>
+              {{ 'candidateForm.fileProcessedCorrectly' | transloco }}
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p><strong>Seniority:</strong> {{ fileData.seniority }}</p>
+            <p><strong>{{ 'candidateForm.yearsOfExperience' | transloco }}:</strong> {{ fileData.yearsOfExperience }}</p>
+            <p><strong>{{ 'candidateForm.availability' | transloco }}:</strong> {{ fileData.availability ? ('candidateForm.yes' | transloco) : ('candidateForm.no' | transloco) }}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div *ngIf="!selectedFile" class="file-instructions">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>help_outline</mat-icon>
+              {{ 'candidateForm.fileFormatHelp' | transloco }}
+            </mat-panel-title>
+            <mat-panel-description>
+              {{ 'candidateForm.viewInstructions' | transloco }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="instructions-content">
+            <p>{{ 'candidateForm.fileInstructions' | transloco }}</p>
+            <ul>
+              <li><code>seniority</code>: "junior" o "senior"</li>
+              <li><code>yearsOfExperience</code>: {{ 'candidateForm.integerNumber' | transloco }}</li>
+              <li><code>availability</code>: true o false</li>
+            </ul>
+            <p><strong>{{ 'candidateForm.csvExample' | transloco }}:</strong></p>
+            <pre>seniority,yearsOfExperience,availability
+junior,3,true</pre>
           </div>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+        </mat-expansion-panel>
+      </div>
 
-
-  <mat-card class="table-card">
-    <mat-card-header>
-      <mat-card-title>
-        {{ 'candidateForm.registeredCandidates' | transloco }}
-        <button mat-icon-button (click)="refreshData()" [disabled]="isLoadingCandidates" class="refresh-btn">
-          <mat-icon>refresh</mat-icon>
+      <div class="form-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmit">
+          <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+          <span *ngIf="!isLoading">{{ 'candidateForm.submit' | transloco }}</span>
+          <span *ngIf="isLoading">{{ 'status.loading' | transloco }}...</span>
         </button>
-      </mat-card-title>
-    </mat-card-header>
 
-    <mat-card-content>
-      <div *ngIf="isLoadingCandidates" class="loading-container">
-        <mat-spinner></mat-spinner>
-        <p>{{ 'candidateForm.loadingCandidates' | transloco }}...</p>
-      </div>
-
-      <div class="table-container" *ngIf="!isLoadingCandidates">
-        <table mat-table [dataSource]="candidateDataSource" class="mat-elevation-z8">
-
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>{{ 'candidateForm.name' | transloco }}</th>
-            <td mat-cell *matCellDef="let element">{{ element.name }}</td>
-          </ng-container>
-
-
-          <ng-container matColumnDef="surname">
-            <th mat-header-cell *matHeaderCellDef>{{ 'candidateForm.surname' | transloco }}</th>
-            <td mat-cell *matCellDef="let element">{{ element.surname }}</td>
-          </ng-container>
-
-
-          <ng-container matColumnDef="seniority">
-            <th mat-header-cell *matHeaderCellDef>{{ 'candidateForm.seniority' | transloco }}</th>
-            <td mat-cell *matCellDef="let element">
-              <span [class]="'seniority-' + element.seniority">
-                {{ element.seniority | titlecase }}
-              </span>
-            </td>
-          </ng-container>
-
-
-          <ng-container matColumnDef="yearsOfExperience">
-            <th mat-header-cell *matHeaderCellDef>{{ 'candidateForm.yearsOfExperience' | transloco }}</th>
-            <td mat-cell *matCellDef="let element">{{ element.yearsOfExperience }}</td>
-          </ng-container>
-
-
-          <ng-container matColumnDef="availability">
-            <th mat-header-cell *matHeaderCellDef>{{ 'candidateForm.availability' | transloco }}</th>
-            <td mat-cell *matCellDef="let element">
-              <mat-icon [class]="element.availability ? 'available' : 'unavailable'">
-                {{ element.availability ? 'check_circle' : 'cancel' }}
-              </mat-icon>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-
-
-        <div *ngIf="candidateDataSource.data.length === 0" class="no-data">
-          <mat-icon>assignment</mat-icon>
-          <p>{{ 'status.noData' | transloco }}</p>
+        <div *ngIf="!canSubmit && !isLoading" class="button-status">
+          <mat-icon>info</mat-icon>
+          <span *ngIf="!candidateForm.valid">{{ 'candidateForm.completeAllFields' | transloco }}</span>
+          <span *ngIf="candidateForm.valid && !selectedFile">{{ 'candidateForm.selectValidFile' | transloco }}</span>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
-</div>
+    </form>
+  </mat-card-content>
+</mat-card>

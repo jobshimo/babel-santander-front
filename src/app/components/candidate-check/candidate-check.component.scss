@@ -1,0 +1,38 @@
+.candidate-check-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.status-card {
+  margin-bottom: 20px;
+
+  &.status-online {
+    background-color: #e8f5e8;
+    border-left: 4px solid #4caf50;
+
+    .mat-card-content {
+      color: #1b5e20;
+    }
+  }
+
+  &.status-offline {
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+
+    .mat-card-content {
+      color: #b71c1c;
+    }
+  }
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.status-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+}
