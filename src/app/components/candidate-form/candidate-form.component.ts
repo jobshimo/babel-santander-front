@@ -165,7 +165,8 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
         this.fileData = null;
         this.showError(this.translocoService.translate(translatedErrorKey));
         return [];
-      })
+      }),
+      takeUntil(this.destroy$)
     ).subscribe();
   }
 
@@ -190,7 +191,8 @@ export class CandidateFormComponent implements OnInit, OnDestroy {
         }),
         finalize(() => {
           this.isLoading = false;
-        })
+        }),
+        takeUntil(this.destroy$)
       ).subscribe();
     } else {
       this.showError(this.translocoService.translate('candidateForm.errors.fileRequired'));

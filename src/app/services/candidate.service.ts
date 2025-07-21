@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
+import { catchError, map, takeUntil, tap } from 'rxjs/operators';
 import { ApiStatus, Candidate, CandidateResponse } from '../models/candidate.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CandidateService {
+export class CandidateService implements OnDestroy {
   private apiUrl = 'http://localhost:3000/candidates';
   private readonly STORAGE_KEY = 'candidatesData';
   private readonly STATUS_KEY = 'apiStatus';
@@ -20,8 +20,15 @@ export class CandidateService {
 
   public apiStatus$ = this.apiStatusSubject.asObservable();
 
+  private destroy$ = new Subject<void>();
+
   constructor(private http: HttpClient) {
     this.loadCachedApiStatus();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadCachedApiStatus(): void {
@@ -37,7 +44,9 @@ export class CandidateService {
   }
 
   private checkApiStatus(): void {
-    this.http.get(this.apiUrl, { observe: 'response' }).subscribe({
+    this.http.get(this.apiUrl, { observe: 'response' }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         const currentStatus = this.apiStatusSubject.value;
         if (!currentStatus.online || currentStatus.usingCachedData) {
