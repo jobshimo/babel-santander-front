@@ -52,6 +52,8 @@ export const translations = {
     "status": {
       "noData": "No hay candidatos registrados",
       "hasData": "{{count}} candidato(s) registrado(s)",
+      "hasDataOffline": "⚠️ {{count}} candidato(s) registrado(s) - Mostrando datos de respaldo (servidor no disponible)",
+      "noDataOffline": "❌ No hay datos disponibles - Servidor no disponible",
       "loading": "Cargando",
       "error": "Error al cargar los datos",
       "serverReconnected": "✅ Servidor reconectado - Datos actualizados",
@@ -120,6 +122,8 @@ export const translations = {
     "status": {
       "noData": "No candidates registered",
       "hasData": "{{count}} candidate(s) registered",
+      "hasDataOffline": "⚠️ {{count}} candidate(s) registered - Showing backup data (server unavailable)",
+      "noDataOffline": "❌ No data available - Server unavailable",
       "loading": "Loading",
       "error": "Error loading data",
       "serverReconnected": "✅ Server reconnected - Data updated",

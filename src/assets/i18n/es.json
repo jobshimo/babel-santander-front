@@ -52,6 +52,8 @@
   "status": {
     "noData": "No hay candidatos registrados",
     "hasData": "{{count}} candidato(s) registrado(s)",
+    "hasDataOffline": "⚠️ {{count}} candidato(s) registrado(s) - Mostrando datos de respaldo (servidor no disponible)",
+    "noDataOffline": "❌ No hay datos disponibles - Servidor no disponible",
     "loading": "Cargando",
     "error": "Error al cargar los datos",
     "serverReconnected": "✅ Servidor reconectado - Datos actualizados",

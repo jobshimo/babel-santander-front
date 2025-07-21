@@ -52,6 +52,8 @@
   "status": {
     "noData": "No candidates registered",
     "hasData": "{{count}} candidate(s) registered",
+    "hasDataOffline": "⚠️ {{count}} candidate(s) registered - Showing backup data (server unavailable)",
+    "noDataOffline": "❌ No data available - Server unavailable",
     "loading": "Loading",
     "error": "Error loading data",
     "serverReconnected": "✅ Server reconnected - Data updated",

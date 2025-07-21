@@ -68,12 +68,20 @@ export class CandidateCheckComponent implements OnInit, OnDestroy {
   }
 
   get statusCardClass(): string {
-    return this.apiStatus.online ? 'status-online' : 'status-offline';
+    return (this.apiStatus.online && !this.apiStatus.usingCachedData) ? 'status-online' : 'status-offline';
   }
 
   get statusMessage(): string {
-    if (this.candidateCount === 0) {
+    const hasData = this.candidateCount > 0;
+    const isOnline = this.apiStatus.online;
+    const usingCachedData = this.apiStatus.usingCachedData;
+
+    if (!hasData && (!isOnline || usingCachedData)) {
+      return 'status.noDataOffline';
+    } else if (!hasData) {
       return 'status.noData';
+    } else if (!isOnline || usingCachedData) {
+      return 'status.hasDataOffline';
     } else {
       return 'status.hasData';
     }
