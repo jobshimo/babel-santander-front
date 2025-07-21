@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
-import { FileService } from './file.service';
-import { FileParserFactory } from './file-parser.factory';
 import { FileData } from '../models/candidate.model';
-import { FILE_ERROR_KEYS } from '../models/file-parser.model';
-import { IFileParser } from '../models/file-parser.model';
+import { FILE_ERROR_KEYS, IFileParser } from '../models/file-parser.model';
+import { FileParserFactory } from './file-parser.factory';
+import { FileService } from './file.service';
 
 describe('FileService', () => {
   let service: FileService;

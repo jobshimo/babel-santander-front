@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { FileParserFactory } from './file-parser.factory';
+import { IFileParser } from '../models/file-parser.model';
 import { CsvFileParser } from './csv-parser.service';
 import { ExcelFileParser } from './excel-parser.service';
-import { IFileParser } from '../models/file-parser.model';
+import { FileParserFactory } from './file-parser.factory';
 
 describe('FileParserFactory', () => {
   let factory: FileParserFactory;

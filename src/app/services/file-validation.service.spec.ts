@@ -1,11 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { FileValidationService } from './file-validation.service';
-import { 
+import {
   DEFAULT_FILE_VALIDATION_CONFIG,
   FILE_ERROR_KEYS,
-  ProcessedRowData,
-  ValidationResult 
+  ProcessedRowData
 } from '../models/file-parser.model';
+import { FileValidationService } from './file-validation.service';
 
 describe('FileValidationService', () => {
   let service: FileValidationService;
@@ -365,14 +364,14 @@ describe('FileValidationService', () => {
     describe('seniority validation', () => {
       it('should accept valid seniority values from config', () => {
         const validSeniorityValues = DEFAULT_FILE_VALIDATION_CONFIG.supportedSeniorityValues;
-        
+
         validSeniorityValues.forEach(seniority => {
           const data: ProcessedRowData = {
             seniority,
             yearsOfExperience: 1,
             availability: true
           };
-          
+
           const result = service.validateRowData(data);
           expect(result.errors).not.toContain(FILE_ERROR_KEYS.INVALID_SENIORITY);
         });

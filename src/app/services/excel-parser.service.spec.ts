@@ -1,14 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
 import * as XLSX from 'xlsx';
+import { FileData } from '../models/candidate.model';
+import {
+  FILE_ERROR_KEYS,
+  ProcessedRowData,
+  SUPPORTED_FILE_TYPES
+} from '../models/file-parser.model';
 import { ExcelFileParser } from './excel-parser.service';
 import { FileValidationService } from './file-validation.service';
-import { FileData } from '../models/candidate.model';
-import { 
-  FILE_ERROR_KEYS,
-  SUPPORTED_FILE_TYPES,
-  ProcessedRowData
-} from '../models/file-parser.model';
 
 // Mock XLSX library
 jest.mock('xlsx', () => ({
@@ -131,7 +130,7 @@ describe('ExcelFileParser', () => {
 
     it('should successfully parse Excel file with headers', (done) => {
       const file = createMockFile('test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      
+
       // Mock XLSX library responses
       const mockWorkbook = {
         SheetNames: ['Sheet1'],
@@ -193,7 +192,7 @@ describe('ExcelFileParser', () => {
 
     it('should successfully parse Excel file without headers', (done) => {
       const file = createMockFile('test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      
+
       const mockWorkbook = {
         SheetNames: ['Sheet1'],
         Sheets: {
@@ -267,7 +266,7 @@ describe('ExcelFileParser', () => {
 
     it('should handle row count validation error', (done) => {
       const file = createMockFile('test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      
+
       mockValidationService.validateRowCount.mockReturnValue({
         isValid: false,
         errors: [FILE_ERROR_KEYS.EMPTY]
@@ -306,7 +305,7 @@ describe('ExcelFileParser', () => {
 
     it('should handle column count validation error for data without headers', (done) => {
       const file = createMockFile('test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      
+
       mockValidationService.validateColumnCount.mockReturnValue({
         isValid: false,
         errors: [FILE_ERROR_KEYS.INVALID_COLUMNS]
@@ -350,7 +349,7 @@ describe('ExcelFileParser', () => {
 
     it('should handle row data validation error', (done) => {
       const file = createMockFile('test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      
+
       mockValidationService.validateRowData.mockReturnValue({
         isValid: false,
         errors: [FILE_ERROR_KEYS.INVALID_SENIORITY]
@@ -394,7 +393,7 @@ describe('ExcelFileParser', () => {
 
     it('should handle XLSX parsing errors', (done) => {
       const file = createMockFile('test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      
+
       mockXLSX.read.mockImplementation(() => {
         throw new Error('Corrupted file');
       });
@@ -544,7 +543,7 @@ describe('ExcelFileParser', () => {
 
       const mockWorkbook = {
         SheetNames: ['Sheet1', 'Sheet2', 'Sheet3'],
-        Sheets: { 
+        Sheets: {
           'Sheet1': {},
           'Sheet2': {},
           'Sheet3': {}
@@ -574,7 +573,7 @@ describe('ExcelFileParser', () => {
         next: (result) => {
           // Verify it used the first sheet
           expect(mockXLSX.utils.sheet_to_json).toHaveBeenCalledWith(
-            mockWorkbook.Sheets['Sheet1'], 
+            mockWorkbook.Sheets['Sheet1'],
             { header: 1 }
           );
           done();

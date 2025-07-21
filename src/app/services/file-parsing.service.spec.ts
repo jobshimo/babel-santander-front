@@ -2,10 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslocoService } from '@jsverse/transloco';
 import { of, throwError } from 'rxjs';
+import { FileData } from '../models/candidate.model';
+import { ErrorTranslationService } from './error-translation.service';
 import { FileParsingService } from './file-parsing.service';
 import { FileService } from './file.service';
-import { ErrorTranslationService } from './error-translation.service';
-import { FileData } from '../models/candidate.model';
 
 describe('FileParsingService', () => {
   let service: FileParsingService;

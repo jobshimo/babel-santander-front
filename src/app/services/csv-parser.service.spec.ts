@@ -1,11 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { CsvFileParser } from './csv-parser.service';
-import { FileValidationService } from './file-validation.service';
-import { FileData } from '../models/candidate.model';
-import { 
+import {
   FILE_ERROR_KEYS,
   SUPPORTED_FILE_TYPES
 } from '../models/file-parser.model';
+import { CsvFileParser } from './csv-parser.service';
+import { FileValidationService } from './file-validation.service';
 
 describe('CsvFileParser', () => {
   let service: CsvFileParser;
@@ -17,7 +16,7 @@ describe('CsvFileParser', () => {
 
   const mockFileReader = (content: string | null, shouldError = false) => {
     const originalFileReader = window.FileReader;
-    
+
     const mockReader = {
       result: content,
       onload: null as any,
@@ -34,7 +33,7 @@ describe('CsvFileParser', () => {
     };
 
     window.FileReader = jest.fn(() => mockReader) as any;
-    
+
     return () => {
       window.FileReader = originalFileReader;
     };
