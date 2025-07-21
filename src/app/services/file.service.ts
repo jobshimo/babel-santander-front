@@ -76,7 +76,7 @@ export class FileService {
   private handleParsingError(error: unknown): Observable<never> {
     // Si el error es un string, convertirlo a Error
     const actualError = error instanceof Error ? error : new Error(String(error));
-    
+
     if (typeof actualError.message === 'string' && actualError.message.startsWith('candidateForm.errors.')) {
       return throwError(() => actualError);
     }

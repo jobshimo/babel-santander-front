@@ -210,7 +210,7 @@ describe('CandidateService', () => {
       imports: [HttpClientTestingModule],
       providers: [CandidateService]
     });
-    
+
     const newService = TestBed.inject(CandidateService);
 
     expect(consoleSpy).toHaveBeenCalled();
