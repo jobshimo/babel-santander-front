@@ -204,7 +204,14 @@ describe('CandidateService', () => {
     jest.spyOn(localStorage, 'getItem').mockReturnValue('invalid-json');
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    const newService = new CandidateService(httpClient);
+    // Crear un nuevo TestBed para este test específico
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [CandidateService]
+    });
+    
+    const newService = TestBed.inject(CandidateService);
 
     expect(consoleSpy).toHaveBeenCalled();
     expect(consoleSpy.mock.calls[0][0]).toBe('Error loading cached API status:');

@@ -69,7 +69,18 @@ describe('LanguageSelectorComponent', () => {
     it('should initialize with current language set in constructor', () => {
       languageServiceSpy.getCurrentLanguage.mockReturnValue('es');
 
-      const newComponent = new LanguageSelectorComponent(languageServiceSpy, translocoServiceSpy);
+      // Crear un nuevo TestBed para este test específico
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [LanguageSelectorComponent],
+        providers: [
+          { provide: LanguageService, useValue: languageServiceSpy },
+          { provide: TranslocoService, useValue: translocoServiceSpy }
+        ]
+      });
+
+      const newFixture = TestBed.createComponent(LanguageSelectorComponent);
+      const newComponent = newFixture.componentInstance;
 
       newComponent.currentLanguage = languageServiceSpy.getCurrentLanguage();
 

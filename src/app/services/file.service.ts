@@ -73,12 +73,15 @@ export class FileService {
   /**
    * Maneja errores de parseo de manera consistente
    */
-  private handleParsingError(error: Error): Observable<never> {
-    if (typeof error.message === 'string' && error.message.startsWith('candidateForm.errors.')) {
-      return throwError(() => error);
+  private handleParsingError(error: unknown): Observable<never> {
+    // Si el error es un string, convertirlo a Error
+    const actualError = error instanceof Error ? error : new Error(String(error));
+    
+    if (typeof actualError.message === 'string' && actualError.message.startsWith('candidateForm.errors.')) {
+      return throwError(() => actualError);
     }
 
-    const errorMessage = error.message;
+    const errorMessage = actualError.message || '';
     if (errorMessage.includes(FILE_ERROR_KEYS.EMPTY)) {
       return throwError(() => new Error(FILE_ERROR_KEYS.EMPTY));
     }

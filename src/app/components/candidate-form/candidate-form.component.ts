@@ -12,8 +12,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Subject } from 'rxjs';
 import { catchError, finalize, takeUntil, tap } from 'rxjs/operators';
 import { Candidate, FileData } from '../../models/candidate.model';
-import { CandidateService } from '../../services/candidate.service';
 import { CandidateStateService } from '../../services/candidate-state.service';
+import { CandidateService } from '../../services/candidate.service';
 import { FileParsingService } from '../../services/file-parsing.service';
 import { NotificationService } from '../../services/notification.service';
 
