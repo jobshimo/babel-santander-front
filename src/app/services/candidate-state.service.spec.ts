@@ -51,13 +51,13 @@ describe('CandidateStateService', () => {
   describe('getters', () => {
     it('should return current candidates', () => {
       (service as any).candidateDataSubject.next(mockCandidates);
-      
+
       expect(service.currentCandidates).toEqual(mockCandidates);
     });
 
     it('should return candidate count', () => {
       (service as any).candidateDataSubject.next(mockCandidates);
-      
+
       expect(service.candidateCount).toBe(2);
     });
 
@@ -206,13 +206,13 @@ describe('CandidateStateService', () => {
 
   describe('addCandidate', () => {
     it('should add candidate to current candidates', () => {
-      const newCandidate: CandidateResponse = { 
-        id: '3', 
-        name: 'New Test', 
-        surname: 'New Surname', 
-        seniority: 'junior', 
-        yearsOfExperience: 1, 
-        availability: true 
+      const newCandidate: CandidateResponse = {
+        id: '3',
+        name: 'New Test',
+        surname: 'New Surname',
+        seniority: 'junior',
+        yearsOfExperience: 1,
+        availability: true
       };
       (service as any).candidateDataSubject.next(mockCandidates);
 
@@ -222,13 +222,13 @@ describe('CandidateStateService', () => {
     });
 
     it('should add candidate to empty list', () => {
-      const newCandidate: CandidateResponse = { 
-        id: '1', 
-        name: 'First Test', 
-        surname: 'First Surname', 
-        seniority: 'senior', 
-        yearsOfExperience: 3, 
-        availability: false 
+      const newCandidate: CandidateResponse = {
+        id: '1',
+        name: 'First Test',
+        surname: 'First Surname',
+        seniority: 'senior',
+        yearsOfExperience: 3,
+        availability: false
       };
 
       service.addCandidate(newCandidate);

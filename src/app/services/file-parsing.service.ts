@@ -7,42 +7,72 @@ import { FileData } from '../models/candidate.model';
 import { ErrorTranslationService } from './error-translation.service';
 import { FileService } from './file.service';
 
+/**
+ * Servicio de alto nivel para el procesamiento de archivos con UI feedback
+ * Responsabilidades:
+ * - Coordinar el parseo de archivos usando FileService
+ * - Manejar la lógica de UI (snackbars, traducciones)
+ * - Proporcionar feedback visual al usuario
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class FileParsingService {
 
   constructor(
-    private fileService: FileService,
-    private errorTranslationService: ErrorTranslationService,
-    private translocoService: TranslocoService,
-    private snackBar: MatSnackBar
+    private readonly fileService: FileService,
+    private readonly errorTranslationService: ErrorTranslationService,
+    private readonly translocoService: TranslocoService,
+    private readonly snackBar: MatSnackBar
   ) { }
 
+  /**
+   * Parsea un archivo y muestra feedback visual al usuario
+   * @param file - Archivo a parsear
+   * @returns Observable con los datos del archivo
+   */
   parseFile(file: File): Observable<FileData> {
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    let parseObservable: Observable<FileData>;
-
-    if (fileExtension === 'xlsx' || fileExtension === 'xls') {
-      parseObservable = this.fileService.parseExcelFile(file);
-    } else if (fileExtension === 'csv') {
-      parseObservable = this.fileService.parseCSVFile(file);
-    } else {
+    // Verificar si el archivo es soportado
+    if (!this.fileService.isFileSupported(file)) {
       const errorKey = 'candidateForm.errors.fileInvalidFormat';
-      this.showError(this.translocoService.translate(errorKey));
-      return throwError(() => new Error(this.translocoService.translate(errorKey)));
+      const errorMessage = this.translocoService.translate(errorKey);
+      this.showError(errorMessage);
+      return throwError(() => new Error(errorKey));
     }
 
-    return parseObservable.pipe(
+    return this.fileService.parseFile(file).pipe(
       tap(() => {
-        this.showSuccess(this.translocoService.translate('success.candidateRegistered'));
+        this.showSuccess(this.translocoService.translate('candidateForm.fileProcessedCorrectly'));
       }),
-      catchError(error => {
-        const translatedErrorKey = this.errorTranslationService.getTranslatedError(error.message);
-        this.showError(this.translocoService.translate(translatedErrorKey));
-        return throwError(() => new Error(this.translocoService.translate(translatedErrorKey)));
-      })
+      catchError(error => this.handleError(error))
     );
+  }
+
+  /**
+   * Obtiene la lista de tipos de archivo soportados para mostrar al usuario
+   * @returns Array de extensiones soportadas
+   */
+  getSupportedFileTypes(): readonly string[] {
+    return this.fileService.getSupportedFileTypes();
+  }
+
+  /**
+   * Verifica si un archivo es soportado
+   * @param file - Archivo a verificar
+   * @returns true si el archivo es soportado
+   */
+  isFileSupported(file: File): boolean {
+    return this.fileService.isFileSupported(file);
+  }
+
+  /**
+   * Maneja errores de parseo y muestra feedback visual
+   */
+  private handleError(error: any): Observable<never> {
+    const translatedErrorKey = this.errorTranslationService.getTranslatedError(error.message);
+    const errorMessage = this.translocoService.translate(translatedErrorKey);
+    this.showError(errorMessage);
+    return throwError(() => new Error(translatedErrorKey));
   }
 
   private showSuccess(message: string): void {

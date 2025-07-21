@@ -1,229 +1,95 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import * as XLSX from 'xlsx';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { FileData } from '../models/candidate.model';
+import { FILE_ERROR_KEYS } from '../models/file-parser.model';
+import { FileParserFactory } from './file-parser.factory';
 
+/**
+ * Servicio principal para el manejo de archivos de candidatos
+ * Responsabilidades:
+ * - Coordinar el parseo de diferentes tipos de archivo
+ * - Manejar errores de manera consistente
+ * - Proporcionar una API simple para los componentes
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class FileService {
 
-  parseExcelFile(file: File): Observable<FileData> {
-    return new Observable(observer => {
-      const reader = new FileReader();
+  constructor(private readonly parserFactory: FileParserFactory) {}
 
-      reader.onload = (e) => {
-        try {
-          const data = new Uint8Array(e.target?.result as ArrayBuffer);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
+  /**
+   * Parsea un archivo de cualquier tipo soportado
+   * @param file - Archivo a parsear
+   * @returns Observable con los datos extraídos del archivo
+   */
+  parseFile(file: File): Observable<FileData> {
+    if (!file) {
+      return throwError(() => new Error('candidateForm.errors.fileRequired'));
+    }
 
-          const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    const parser = this.parserFactory.getParser(file);
+    if (!parser) {
+      return throwError(() => new Error('candidateForm.errors.fileInvalidFormat'));
+    }
 
-          if (rawData.length === 0) {
-            observer.error(new Error('El archivo está vacío'));
-            return;
-          }
-
-          if (rawData.length > 1) {
-            observer.error(new Error('El archivo debe contener exactamente una fila de datos (puede incluir una fila de encabezado)'));
-            return;
-          }
-
-          let row: any;
-
-          let jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-          if (jsonData.length > 0) {
-            row = jsonData[0] as any;
-
-            const hasValidHeaders = row.hasOwnProperty('seniority') &&
-                                   row.hasOwnProperty('yearsOfExperience') &&
-                                   row.hasOwnProperty('availability');
-
-            if (!hasValidHeaders) {
-              const rawRow = rawData[0] as any[];
-
-              if (rawRow.length !== 3) {
-                observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
-                return;
-              }
-
-              row = {
-                seniority: rawRow[0],
-                yearsOfExperience: rawRow[1],
-                availability: rawRow[2]
-              };
-            }
-          } else {
-            const rawRow = rawData[0] as any[];
-
-            if (rawRow.length !== 3) {
-              observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
-              return;
-            }
-
-            row = {
-              seniority: rawRow[0],
-              yearsOfExperience: rawRow[1],
-              availability: rawRow[2]
-            };
-          }
-
-          if (row.seniority !== 'junior' && row.seniority !== 'senior') {
-            observer.error(new Error('El campo seniority debe ser "junior" o "senior"'));
-            return;
-          }
-
-          let yearsOfExperience = row.yearsOfExperience;
-          if (typeof yearsOfExperience === 'string') {
-            yearsOfExperience = parseInt(yearsOfExperience, 10);
-          }
-          if (typeof yearsOfExperience !== 'number' || isNaN(yearsOfExperience) || yearsOfExperience < 0) {
-            observer.error(new Error('El campo yearsOfExperience debe ser un número positivo'));
-            return;
-          }
-
-          let availability = row.availability;
-          if (typeof availability === 'string') {
-            const lowerAvailability = availability.toLowerCase();
-            if (lowerAvailability === 'true') {
-              availability = true;
-            } else if (lowerAvailability === 'false') {
-              availability = false;
-            } else {
-              observer.error(new Error('El campo availability debe ser "true" o "false"'));
-              return;
-            }
-          } else if (typeof availability !== 'boolean') {
-            observer.error(new Error('El campo availability debe ser un booleano'));
-            return;
-          }
-
-          const fileData: FileData = {
-            seniority: row.seniority,
-            yearsOfExperience: yearsOfExperience,
-            availability: availability
-          };
-
-          observer.next(fileData);
-          observer.complete();
-        } catch (error) {
-          observer.error(new Error('Error al leer el archivo: ' + error));
-        }
-      };
-
-      reader.onerror = () => {
-        observer.error(new Error('Error al leer el archivo'));
-      };
-
-      reader.readAsArrayBuffer(file);
-    });
+    return parser.parse(file).pipe(
+      map(data => this.postProcessFileData(data)),
+      catchError(error => this.handleParsingError(error))
+    );
   }
 
-  parseCSVFile(file: File): Observable<FileData> {
-    return new Observable(observer => {
-      const reader = new FileReader();
+  /**
+   * Verifica si un archivo es soportado por el servicio
+   * @param file - Archivo a verificar
+   * @returns true si el archivo es soportado
+   */
+  isFileSupported(file: File): boolean {
+    return this.parserFactory.isSupported(file);
+  }
 
-      reader.onload = (e) => {
-        try {
-          const csvData = e.target?.result as string;
-          const lines = csvData.split('\n').filter(line => line.trim() !== '');
+  /**
+   * Obtiene la lista de extensiones de archivo soportadas
+   * @returns Array de extensiones soportadas
+   */
+  getSupportedFileTypes(): readonly string[] {
+    return this.parserFactory.getSupportedTypes();
+  }
 
-          if (lines.length === 0) {
-            observer.error(new Error('El archivo está vacío'));
-            return;
-          }
+  /**
+   * Post-procesa los datos extraídos del archivo
+   * Aquí se pueden agregar transformaciones adicionales si es necesario
+   */
+  private postProcessFileData(data: FileData): FileData {
 
-          if (lines.length > 2) {
-            observer.error(new Error('El archivo debe contener exactamente una fila de datos (puede incluir una fila de encabezado)'));
-            return;
-          }
+    return {
+      ...data,
+      seniority: data.seniority,
+      yearsOfExperience: Number(data.yearsOfExperience),
+      availability: Boolean(data.availability)
+    };
+  }
 
-          let row: any = {};
+  /**
+   * Maneja errores de parseo de manera consistente
+   */
+  private handleParsingError(error: any): Observable<never> {
+    if (typeof error.message === 'string' && error.message.startsWith('candidateForm.errors.')) {
+      return throwError(() => error);
+    }
 
-          if (lines.length === 2) {
-            const headers = lines[0].split(',').map(h => h.trim());
-            const values = lines[1].split(',').map(v => v.trim());
+    const errorMessage = error.message || error;
+    if (errorMessage.includes(FILE_ERROR_KEYS.EMPTY)) {
+      return throwError(() => new Error(FILE_ERROR_KEYS.EMPTY));
+    }
+    if (errorMessage.includes(FILE_ERROR_KEYS.INVALID_ROWS)) {
+      return throwError(() => new Error(FILE_ERROR_KEYS.INVALID_ROWS));
+    }
+    if (errorMessage.includes(FILE_ERROR_KEYS.INVALID_COLUMNS)) {
+      return throwError(() => new Error(FILE_ERROR_KEYS.INVALID_COLUMNS));
+    }
 
-            if (headers.length !== values.length) {
-              observer.error(new Error('El número de columnas no coincide'));
-              return;
-            }
-
-            headers.forEach((header, index) => {
-              row[header] = values[index];
-            });
-
-            const hasValidHeaders = row.hasOwnProperty('seniority') &&
-                                   row.hasOwnProperty('yearsOfExperience') &&
-                                   row.hasOwnProperty('availability');
-
-            if (!hasValidHeaders) {
-              const values = lines[0].split(',').map(v => v.trim());
-
-              if (values.length !== 3) {
-                observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
-                return;
-              }
-
-              row = {
-                seniority: values[0],
-                yearsOfExperience: values[1],
-                availability: values[2]
-              };
-            }
-          } else {
-            const values = lines[0].split(',').map(v => v.trim());
-
-            if (values.length !== 3) {
-              observer.error(new Error('El archivo debe contener exactamente 3 columnas: seniority, yearsOfExperience, availability'));
-              return;
-            }
-
-            row = {
-              seniority: values[0],
-              yearsOfExperience: values[1],
-              availability: values[2]
-            };
-          }
-
-          if (row.seniority !== 'junior' && row.seniority !== 'senior') {
-            observer.error(new Error('El campo seniority debe ser "junior" o "senior"'));
-            return;
-          }
-
-          const yearsOfExperience = parseInt(row.yearsOfExperience, 10);
-          if (isNaN(yearsOfExperience) || yearsOfExperience < 0) {
-            observer.error(new Error('El campo yearsOfExperience debe ser un número positivo'));
-            return;
-          }
-
-          const availability = row.availability.toLowerCase() === 'true';
-          if (row.availability.toLowerCase() !== 'true' && row.availability.toLowerCase() !== 'false') {
-            observer.error(new Error('El campo availability debe ser "true" o "false"'));
-            return;
-          }
-
-          const fileData: FileData = {
-            seniority: row.seniority,
-            yearsOfExperience: yearsOfExperience,
-            availability: availability
-          };
-
-          observer.next(fileData);
-          observer.complete();
-        } catch (error) {
-          observer.error(new Error('Error al leer el archivo CSV: ' + error));
-        }
-      };
-
-      reader.onerror = () => {
-        observer.error(new Error('Error al leer el archivo'));
-      };
-
-      reader.readAsText(file);
-    });
+    return throwError(() => new Error(FILE_ERROR_KEYS.READ_ERROR));
   }
 }

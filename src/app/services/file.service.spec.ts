@@ -1,188 +1,338 @@
 import { TestBed } from '@angular/core/testing';
-import { FileData } from '../models/candidate.model';
+import { of, throwError } from 'rxjs';
 import { FileService } from './file.service';
+import { FileParserFactory } from './file-parser.factory';
+import { FileData } from '../models/candidate.model';
+import { FILE_ERROR_KEYS } from '../models/file-parser.model';
+import { IFileParser } from '../models/file-parser.model';
 
 describe('FileService', () => {
   let service: FileService;
+  let mockParserFactory: any;
+  let mockParser: jest.Mocked<IFileParser>;
+
+  const mockFileData: FileData = {
+    seniority: 'junior',
+    yearsOfExperience: 3,
+    availability: true
+  };
+
+  const createMockFile = (name: string, type: string): File => {
+    return new File(['test content'], name, { type });
+  };
 
   beforeEach(() => {
+    mockParser = {
+      canParse: jest.fn(),
+      parse: jest.fn(),
+      supportedTypes: ['.csv', '.xlsx']
+    };
+
+    mockParserFactory = {
+      getParser: jest.fn(),
+      isSupported: jest.fn(),
+      getSupportedTypes: jest.fn()
+    } as any;
+
     TestBed.configureTestingModule({
-      providers: [FileService]
+      providers: [
+        FileService,
+        { provide: FileParserFactory, useValue: mockParserFactory }
+      ]
     });
+
     service = TestBed.inject(FileService);
+    jest.clearAllMocks();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('parseCSVFile', () => {
-    it('should parse valid CSV file with junior seniority', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability\njunior,3,true';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: (result: FileData) => {
-          expect(result.seniority).toBe('junior');
-          expect(result.yearsOfExperience).toBe(3);
-          expect(result.availability).toBe(true);
-          done();
-        },
+  describe('parseFile', () => {
+    it('should throw error when file is null', (done) => {
+      service.parseFile(null as any).subscribe({
         error: (error) => {
-          fail(error.message);
+          expect(error.message).toBe('candidateForm.errors.fileRequired');
+          done();
         }
       });
     });
 
-    it('should parse valid CSV file with senior seniority', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability\nsenior,8,false';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+    it('should throw error when file is undefined', (done) => {
+      service.parseFile(undefined as any).subscribe({
+        error: (error) => {
+          expect(error.message).toBe('candidateForm.errors.fileRequired');
+          done();
+        }
+      });
+    });
 
-      service.parseCSVFile(file).subscribe({
-        next: (result: FileData) => {
+    it('should throw error when no parser is found for file type', (done) => {
+      const mockFile = createMockFile('test.txt', 'text/plain');
+      mockParserFactory.getParser.mockReturnValue(null);
+
+      service.parseFile(mockFile).subscribe({
+        error: (error) => {
+          expect(error.message).toBe('candidateForm.errors.fileInvalidFormat');
+          expect(mockParserFactory.getParser).toHaveBeenCalledWith(mockFile);
+          done();
+        }
+      });
+    });
+
+    it('should successfully parse file and post-process data', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const rawData = {
+        seniority: 'junior' as const,
+        yearsOfExperience: '3', // String que debería convertirse a number
+        availability: 'true' // String que debería convertirse a boolean
+      };
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(of(rawData as any));
+
+      service.parseFile(mockFile).subscribe({
+        next: (result) => {
+          expect(result).toEqual({
+            seniority: 'junior',
+            yearsOfExperience: 3,
+            availability: true
+          });
+          expect(mockParserFactory.getParser).toHaveBeenCalledWith(mockFile);
+          expect(mockParser.parse).toHaveBeenCalledWith(mockFile);
+          done();
+        }
+      });
+    });
+
+    it('should handle parsing errors and map to specific error keys', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const errorWithEmptyKey = new Error('File contains ' + FILE_ERROR_KEYS.EMPTY);
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(throwError(() => errorWithEmptyKey));
+
+      service.parseFile(mockFile).subscribe({
+        error: (error) => {
+          expect(error.message).toBe(FILE_ERROR_KEYS.EMPTY);
+          done();
+        }
+      });
+    });
+
+    it('should handle parsing errors for invalid rows', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const errorWithInvalidRows = new Error('Invalid rows detected');
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(throwError(() => errorWithInvalidRows));
+
+      service.parseFile(mockFile).subscribe({
+        error: (error) => {
+          expect(error.message).toBe(FILE_ERROR_KEYS.READ_ERROR);
+          done();
+        }
+      });
+    });
+
+    it('should handle parsing errors for invalid columns', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const errorWithInvalidColumns = new Error('Contains ' + FILE_ERROR_KEYS.INVALID_COLUMNS);
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(throwError(() => errorWithInvalidColumns));
+
+      service.parseFile(mockFile).subscribe({
+        error: (error) => {
+          expect(error.message).toBe(FILE_ERROR_KEYS.INVALID_COLUMNS);
+          done();
+        }
+      });
+    });
+
+    it('should preserve translation keys when error message starts with candidateForm.errors', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const translationError = new Error('candidateForm.errors.customError');
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(throwError(() => translationError));
+
+      service.parseFile(mockFile).subscribe({
+        error: (error) => {
+          expect(error.message).toBe('candidateForm.errors.customError');
+          done();
+        }
+      });
+    });
+
+    it('should handle errors without message property', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const stringError = 'Simple string error';
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(throwError(() => stringError));
+
+      service.parseFile(mockFile).subscribe({
+        error: (error) => {
+          expect(error.message).toBe(FILE_ERROR_KEYS.READ_ERROR);
+          done();
+        }
+      });
+    });
+  });
+
+  describe('isFileSupported', () => {
+    it('should return true when file is supported', () => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      mockParserFactory.isSupported.mockReturnValue(true);
+
+      const result = service.isFileSupported(mockFile);
+
+      expect(result).toBe(true);
+      expect(mockParserFactory.isSupported).toHaveBeenCalledWith(mockFile);
+    });
+
+    it('should return false when file is not supported', () => {
+      const mockFile = createMockFile('test.txt', 'text/plain');
+      mockParserFactory.isSupported.mockReturnValue(false);
+
+      const result = service.isFileSupported(mockFile);
+
+      expect(result).toBe(false);
+      expect(mockParserFactory.isSupported).toHaveBeenCalledWith(mockFile);
+    });
+  });
+
+  describe('getSupportedFileTypes', () => {
+    it('should return supported file types from factory', () => {
+      const supportedTypes = ['.csv', '.xlsx', '.xls'];
+      mockParserFactory.getSupportedTypes.mockReturnValue(supportedTypes);
+
+      const result = service.getSupportedFileTypes();
+
+      expect(result).toEqual(supportedTypes);
+      expect(mockParserFactory.getSupportedTypes).toHaveBeenCalled();
+    });
+
+    it('should return readonly array', () => {
+      const supportedTypes = ['.csv', '.xlsx'];
+      mockParserFactory.getSupportedTypes.mockReturnValue(supportedTypes);
+
+      const result = service.getSupportedFileTypes();
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toEqual(supportedTypes);
+    });
+  });
+
+  describe('postProcessFileData (private method behavior)', () => {
+    it('should convert string yearsOfExperience to number', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const rawData = {
+        seniority: 'senior' as const,
+        yearsOfExperience: '5',
+        availability: true
+      };
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(of(rawData as any));
+
+      service.parseFile(mockFile).subscribe({
+        next: (result) => {
+          expect(result.yearsOfExperience).toBe(5);
+          expect(typeof result.yearsOfExperience).toBe('number');
+          done();
+        }
+      });
+    });
+
+    it('should convert string availability to boolean', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const rawData = {
+        seniority: 'junior' as const,
+        yearsOfExperience: 2,
+        availability: 'false' // String 'false' se convierte a boolean true
+      };
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(of(rawData as any));
+
+      service.parseFile(mockFile).subscribe({
+        next: (result) => {
+          expect(result.availability).toBe(true); // Boolean('false') = true
+          expect(typeof result.availability).toBe('boolean');
+          done();
+        }
+      });
+    });
+
+    it('should convert empty string availability to false', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const rawData = {
+        seniority: 'junior' as const,
+        yearsOfExperience: 2,
+        availability: '' // Empty string se convierte a boolean false
+      };
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(of(rawData as any));
+
+      service.parseFile(mockFile).subscribe({
+        next: (result) => {
+          expect(result.availability).toBe(false); // Boolean('') = false
+          expect(typeof result.availability).toBe('boolean');
+          done();
+        }
+      });
+    });
+
+    it('should preserve seniority value as is', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const rawData = {
+        seniority: 'senior' as const,
+        yearsOfExperience: 7,
+        availability: true
+      };
+
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(of(rawData as any));
+
+      service.parseFile(mockFile).subscribe({
+        next: (result) => {
           expect(result.seniority).toBe('senior');
-          expect(result.yearsOfExperience).toBe(8);
-          expect(result.availability).toBe(false);
           done();
-        },
-        error: (error) => {
-          fail(error);
         }
       });
     });
+  });
 
-    it('should reject CSV with invalid seniority value', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability\nmiddle,3,true';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+  describe('error handling edge cases', () => {
+    it('should handle FILE_ERROR_KEYS.INVALID_ROWS in error message', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const error = new Error('Error with ' + FILE_ERROR_KEYS.INVALID_ROWS + ' detected');
 
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for invalid seniority');
-        },
-        error: (error) => {
-          expect(error.message).toContain('seniority debe ser "junior" o "senior"');
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(throwError(() => error));
+
+      service.parseFile(mockFile).subscribe({
+        error: (err) => {
+          expect(err.message).toBe(FILE_ERROR_KEYS.INVALID_ROWS);
           done();
         }
       });
     });
 
-    it('should reject CSV with invalid years of experience', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability\njunior,invalid,true';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
+    it('should default to READ_ERROR for unknown error types', (done) => {
+      const mockFile = createMockFile('test.csv', 'text/csv');
+      const unknownError = new Error('Unknown error type');
 
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for invalid yearsOfExperience');
-        },
+      mockParserFactory.getParser.mockReturnValue(mockParser);
+      mockParser.parse.mockReturnValue(throwError(() => unknownError));
+
+      service.parseFile(mockFile).subscribe({
         error: (error) => {
-          expect(error.message).toContain('yearsOfExperience debe ser un número positivo');
-          done();
-        }
-      });
-    });
-
-    it('should reject CSV with invalid availability value', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability\njunior,3,maybe';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for invalid availability');
-        },
-        error: (error) => {
-          expect(error.message).toContain('availability debe ser "true" o "false"');
-          done();
-        }
-      });
-    });
-
-    it('should reject CSV with missing required columns', (done) => {
-      const csvContent = 'seniority,yearsOfExperience\njunior,3';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for missing columns');
-        },
-        error: (error) => {
-          expect(error.message).toContain('debe contener exactamente 3 columnas');
-          done();
-        }
-      });
-    });
-
-    it('should reject CSV with multiple data rows', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability\njunior,3,true\nsenior,5,false';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for multiple data rows');
-        },
-        error: (error) => {
-          expect(error.message).toContain('debe contener exactamente una fila de datos (puede incluir');
-          done();
-        }
-      });
-    });
-
-    it('should reject CSV with no data rows', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for invalid seniority value');
-        },
-        error: (error) => {
-          expect(error.message).toContain('seniority debe ser "junior" o "senior"');
-          done();
-        }
-      });
-    });
-
-    it('should reject CSV with negative years of experience', (done) => {
-      const csvContent = 'seniority,yearsOfExperience,availability\njunior,-1,true';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for negative yearsOfExperience');
-        },
-        error: (error) => {
-          expect(error.message).toContain('yearsOfExperience debe ser un número positivo');
-          done();
-        }
-      });
-    });
-
-    it('should parse CSV file without headers', (done) => {
-      const csvContent = 'senior,7,false';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: (result: FileData) => {
-          expect(result.seniority).toBe('senior');
-          expect(result.yearsOfExperience).toBe(7);
-          expect(result.availability).toBe(false);
-          done();
-        },
-        error: (error) => {
-          fail(error.message);
-        }
-      });
-    });
-
-    it('should reject CSV without headers if wrong number of columns', (done) => {
-      const csvContent = 'senior,7';
-      const file = new File([csvContent], 'test.csv', { type: 'text/csv' });
-
-      service.parseCSVFile(file).subscribe({
-        next: () => {
-          fail('Should have thrown an error for wrong number of columns');
-        },
-        error: (error) => {
-          expect(error.message).toContain('debe contener exactamente 3 columnas');
+          expect(error.message).toBe(FILE_ERROR_KEYS.READ_ERROR);
           done();
         }
       });

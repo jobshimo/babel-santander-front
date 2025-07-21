@@ -69,7 +69,7 @@ describe('CandidateManagementComponent', () => {
       translocoService.translate.mockReturnValue('Server reconnected');
 
       component.ngOnInit();
-      
+
       apiStatusSubject.next({ online: true, usingCachedData: false });
 
       expect(translocoService.translate).toHaveBeenCalledWith('status.serverReconnected');
@@ -80,7 +80,7 @@ describe('CandidateManagementComponent', () => {
       jest.spyOn(candidateStateService, 'currentCandidates', 'get').mockReturnValue([]);
 
       component.ngOnInit();
-      
+
       apiStatusSubject.next({ online: true, usingCachedData: false });
 
       expect(translocoService.translate).not.toHaveBeenCalled();
@@ -91,7 +91,7 @@ describe('CandidateManagementComponent', () => {
       jest.spyOn(candidateStateService, 'currentCandidates', 'get').mockReturnValue([{ id: 1, name: 'Test' }] as any);
 
       component.ngOnInit();
-      
+
       apiStatusSubject.next({ online: false, usingCachedData: false });
 
       expect(translocoService.translate).not.toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe('CandidateManagementComponent', () => {
       jest.spyOn(candidateStateService, 'currentCandidates', 'get').mockReturnValue([{ id: 1, name: 'Test' }] as any);
 
       component.ngOnInit();
-      
+
       apiStatusSubject.next({ online: true, usingCachedData: true });
 
       expect(translocoService.translate).not.toHaveBeenCalled();
