@@ -8,7 +8,7 @@ import { ApiStatus, Candidate, CandidateResponse } from '../models/candidate.mod
   providedIn: 'root'
 })
 export class CandidateService implements OnDestroy {
-  private apiUrl = 'http://localhost:3000/candidates';
+  private apiUrl = 'https://cruel-selestina-jobshimo-7847f573.koyeb.app/candidates';
   private readonly STORAGE_KEY = 'candidatesData';
   private readonly STATUS_KEY = 'apiStatus';
 
